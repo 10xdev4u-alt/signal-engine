@@ -1,0 +1,12 @@
+# Signal Engine crontab entries
+# Install with: crontab -e (merge these lines)
+# Assumes repo checked out at ~/signal-engine with .venv ready.
+
+# Pull new posts + run analysis every 30 minutes
+*/30 * * * *  cd $HOME/signal-engine && . .venv/bin/activate && ./run.sh fetch analyze >> data/cron.log 2>&1
+
+# Morning digest at 08:00 local
+0 8 * * *     cd $HOME/signal-engine && . .venv/bin/activate && ./run.sh digest >> data/cron.log 2>&1
+
+# Weekly cross-subreddit niche report, Mondays 07:00
+0 7 * * 1     cd $HOME/signal-engine && . .venv/bin/activate && ./run.sh report --weekly >> data/cron.log 2>&1
