@@ -17,8 +17,10 @@ Planning complete, implementation starting. See:
 - [`docs/PRD.md`](docs/PRD.md) — product requirements (strict schema)
 - [`docs/RESEARCH.md`](docs/RESEARCH.md) — verified platform facts behind every design decision
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — modules, data model, runtime topology
-- [`docs/issues/BACKLOG.md`](docs/issues/BACKLOG.md) — 13 PR-sized issues across 4 milestones
-- [`AGENTS.md`](AGENTS.md) — the agentic research → issue → PR development loop
+- [`docs/issues/BACKLOG.md`](docs/issues/BACKLOG.md) — issue index across 5 milestones
+- [`docs/GUARDRAILS.md`](docs/GUARDRAILS.md) — enforced repo protections
+- [`docs/adr/`](docs/adr/) — architecture decision records (RSS-only, local-first, LLM-optional)
+- [`AGENTS.md`](AGENTS.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) — the agentic research → issue → PR loop
 
 ## Quickstart (once M0 lands)
 
