@@ -91,6 +91,14 @@ def cmd_fetch(args) -> int:
     settings, conn = _open_db()
     client = PacedClient(pace_seconds=settings.pace_seconds)
     summary = fetch_subreddits(conn, client, names=args.subreddits)
+    from signal_engine.ingest.fetch import fetch_comments
+
+    comments_summary = fetch_comments(
+        conn,
+        client,
+        max_age_h=settings.comment_max_age_h,
+        budget=max(1, int(settings.fetch_window_min * 60 / settings.pace_seconds) // 2),
+    )
     console = Console()
     for name, count in summary.fetched_counts:
         console.print(f"[green]{name}: {count} new posts[/green]")
@@ -102,11 +110,15 @@ def cmd_fetch(args) -> int:
         console.print(f"[red]{name}: {err}[/red]")
     for url, delay in client.backoff_events:
         console.print(f"[yellow]backing off {delay}s after block on {url}[/yellow]")
-    if summary.breaker_tripped:
+    if summary.breaker_tripped or comments_summary.breaker_tripped:
         console.print(
-            f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] {summary.breaker_tripped}"
+            f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] "
+            f"{summary.breaker_tripped or comments_summary.breaker_tripped}"
         )
-    return 1 if summary.errors or summary.breaker_tripped else 0
+        return 1
+    for post_id, count in comments_summary.fetched_counts:
+        console.print(f"[green]{post_id}: {count} new comments[/green]")
+    return 1 if summary.errors or comments_summary.errors else 0
 
 
 def cmd_not_implemented(name: str):

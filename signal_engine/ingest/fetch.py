@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from signal_engine.db import get_setting, list_subreddits, set_setting
-from signal_engine.ingest.store import upsert_post
+from signal_engine.ingest.store import upsert_comment, upsert_post
 from signal_engine.sources.base import posts_url
 from signal_engine.sources.polite import CircuitBreakerOpen, PacedClient
 
@@ -41,11 +41,11 @@ def _log_fetch(
 
 
 def _drain_attempts(
-    conn: sqlite3.Connection, client: PacedClient, start: int = 0
+    conn: sqlite3.Connection, client: PacedClient, start: int = 0, kind: str = "post_feed"
 ) -> None:
     """Persist every raw attempt (incl. 429/403) so error rates stay truthful."""
     for url, status, size in client.attempt_log[start:]:
-        _log_fetch(conn, url, "post_feed", status, size)
+        _log_fetch(conn, url, kind, status, size)
     del client.attempt_log[start:]
 
 
@@ -114,3 +114,59 @@ def fetch_subreddits(
 def stored_subreddit(posts: list, fallback: str) -> str:
     """Posts already carry their feed's category; fall back to requested name."""
     return posts[0].subreddit if posts else fallback
+
+
+def fetch_comments(
+    conn: sqlite3.Connection,
+    client: PacedClient,
+    max_age_h: int = 48,
+    budget: int = 20,
+    now_fn: Callable[[], float] | None = None,
+) -> FetchSummary:
+    """Pull comment feeds for the oldest posts under ``max_age_h``.
+
+    At most ``budget`` comment-feed requests per run so a cron invocation
+    can never blow the politeness window. Posts are marked done regardless
+    of outcome once fetched — no infinite retry loops on dead threads.
+    """
+    from signal_engine.sources.base import comments_url
+    from signal_engine.sources.rss import parse_comment_feed
+
+    summary = FetchSummary()
+    clock = now_fn or time.time
+    cutoff_jd = (clock() - max_age_h * 3600) / 86400.0 + 2440587.5
+    rows = conn.execute(
+        "SELECT id, subreddit, permalink FROM posts "
+        "WHERE comments_done_at IS NULL AND julianday(created_utc) >= ? "
+        "ORDER BY created_utc ASC LIMIT ?",
+        (cutoff_jd, budget),
+    ).fetchall()
+    for row in rows:
+        seen = len(client.attempt_log)
+        try:
+            response = client.get(comments_url(row["permalink"]))
+        except CircuitBreakerOpen as exc:
+            _drain_attempts(conn, client, start=seen, kind="comment_feed")
+            summary.breaker_tripped = str(exc)
+            break
+        _drain_attempts(conn, client, start=seen, kind="comment_feed")
+        if response.status_code == 200:
+            try:
+                comments = parse_comment_feed(response.text, row["subreddit"], row["id"])
+            except Exception as exc:  # noqa: BLE001
+                summary.errors.append((row["id"], f"parse: {exc}"))
+                conn.execute(
+                    "UPDATE posts SET comments_done_at = datetime('now') WHERE id = ?",
+                    (row["id"],),
+                )
+                conn.commit()
+                continue
+            stored = sum(1 for c in comments if upsert_comment(conn, c))
+            summary.fetched_counts.append((row["id"], stored))
+        else:
+            summary.errors.append((row["id"], f"HTTP {response.status_code}"))
+        conn.execute(
+            "UPDATE posts SET comments_done_at = datetime('now') WHERE id = ?", (row["id"],)
+        )
+        conn.commit()
+    return summary
