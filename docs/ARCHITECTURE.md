@@ -30,7 +30,7 @@ signal-engine/
 │   │   ├── ngrams.py         # 1–3 gram freq per sub/day, stopword list
 │   │   ├── questions.py      # question & ask-pattern detection regexes
 │   │   ├── frustration.py    # lexicon scoring ("burned", "wasted", "scam", …)
-│   │   ├── cluster.py        # cosine sim over tf-idf vectors, threshold 0.62,
+│   │   ├── cluster.py        # presence-cosine over stemmed token sets, default 0.4
 │   │   │                     # incremental assign-or-new-cluster
 │   │   └── intent.py         # heuristic 1–5; LLMRescorer if provider set
 │   ├── llm/

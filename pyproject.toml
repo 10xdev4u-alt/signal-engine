@@ -30,7 +30,7 @@ signal-engine = "signal_engine.cli:main"
 include = ["signal_engine*"]
 
 [tool.setuptools.package-data]
-signal_engine = ["migrations/*.sql"]
+signal_engine = ["migrations/*.sql", "data/*.txt"]
 
 [tool.ruff]
 line-length = 100
