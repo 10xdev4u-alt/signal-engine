@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <category term="smallbusiness" label="r/smallbusiness"/>
+  <title>Comments</title>
+  <entry>
+    <title>How do I stop chargebacks destroying my margin?</title>
+    <link href="https://old.reddit.com/r/smallbusiness/comments/abc123/how_do_i_stop_chargebacks/"/>
+    <id>t3_abc123</id>
+    <published>2026-08-20T10:00:00+00:00</published>
+    <updated>2026-08-20T10:00:00+00:00</updated>
+  </entry>
+  <entry>
+    <title>Comment from discussion How do I stop chargebacks?</title>
+    <link href="https://old.reddit.com/r/smallbusiness/comments/abc123/_/cmt001/"/>
+    <id>t1_cmt001</id>
+    <published>2026-08-20T11:05:00+00:00</published>
+    <updated>2026-08-20T11:05:00+00:00</updated>
+    <author><name>/u/friendlycpa</name></author>
+    <content type="html">&amp;lt;div class="md"&amp;gt;&amp;lt;p&amp;gt;We switched to requiring signature on delivery and disputes dropped to almost nothing. Worth paying for the verification service honestly.&amp;lt;/p&amp;gt;&amp;lt;/div&amp;gt;</content>
+  </entry>
+  <entry>
+    <title>Another comment</title>
+    <link href="https://old.reddit.com/r/smallbusiness/comments/abc123/_/cmt002/"/>
+    <id>t1_cmt002</id>
+    <published>2026-08-20T12:40:00+00:00</published>
+    <updated>2026-08-20T12:40:00+00:00</updated>
+    <author><name>/u/burnedout_bob</name></author>
+    <content type="html">&amp;lt;div class="md"&amp;gt;&amp;lt;p&amp;gt;Same here. Tried the dispute template everyone recommends and it did nothing, wasted months on it.&amp;lt;/p&amp;gt;&amp;lt;/div&amp;gt;</content>
+  </entry>
+</feed>

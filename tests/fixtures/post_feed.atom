@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <category term="smallbusiness" label="r/smallbusiness"/>
+  <title>r/smallbusiness</title>
+  <id>https://www.reddit.com/r/smallbusiness/.rss</id>
+  <entry>
+    <title>How do I stop chargebacks destroying my margin?</title>
+    <link href="https://old.reddit.com/r/smallbusiness/comments/abc123/how_do_i_stop_chargebacks/"/>
+    <id>t3_abc123</id>
+    <published>2026-08-20T10:00:00+00:00</published>
+    <updated>2026-08-20T10:00:00+00:00</updated>
+    <author><name>/u/shopowner_22</name><uri>https://old.reddit.com/user/shopowner_22</uri></author>
+    <content type="html">&amp;lt;!-- SC_OFF --&amp;gt;&amp;lt;div class="md"&amp;gt;&amp;lt;p&amp;gt;I tried Stripe disputes and lost. Spent $400 on chargeback fees this month alone and I am about to give up on card payments.&amp;lt;/p&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;!-- SC_ON --&amp;gt;</content>
+  </entry>
+  <entry>
+    <title>Free tool that schedules social posts (not mine)</title>
+    <link href="https://old.reddit.com/r/smallbusiness/comments/def456/free_tool_that_schedules/"/>
+    <id>t3_def456</id>
+    <published>2026-08-21T09:30:00+00:00</published>
+    <updated>2026-08-21T09:30:00+00:00</updated>
+    <author><name>/u/linklurker</name></author>
+    <content type="html">Submitted by /u/linklurker [link] [comments]</content>
+  </entry>
+</feed>
