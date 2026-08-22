@@ -129,6 +129,22 @@ def cmd_not_implemented(name: str):
     return handler
 
 
+def cmd_analyze(_args) -> int:
+    from rich.console import Console
+
+    from signal_engine.analyze import build_phrase_stats, rebuild_clusters, record_intent
+
+    _, conn = _open_db()
+    phrases = build_phrase_stats(conn)
+    scored = record_intent(conn)
+    clusters = rebuild_clusters(conn)
+    Console().print(
+        f"[green]analyzed:[/green] {phrases} phrase stats, "
+        f"{scored} items intent-scored, {clusters} pain clusters"
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="signal-engine", description=__doc__)
     parser.add_argument("--version", action="version", version=__version__)
@@ -148,7 +164,11 @@ def build_parser() -> argparse.ArgumentParser:
         func=cmd_status
     )
 
-    for future in ("analyze", "digest", "serve", "report"):
+    sub.add_parser("analyze", help="extract signals from collected data").set_defaults(
+        func=cmd_analyze
+    )
+
+    for future in ("digest", "serve", "report"):
         sub.add_parser(future).set_defaults(func=cmd_not_implemented(future))
     return parser
 
