@@ -73,18 +73,22 @@ def test_subreddit_registry_roundtrip(tmp_path):
 
 
 def test_settings_mask_secrets():
-    masked = repr(Settings(anthropic_api_key="sk-ant-supersecret"))
-    assert "sk-ant-supersecret" not in masked
+    fake = "not-a-real-credential-just-a-fixture-value"
+    masked = repr(Settings(anthropic_api_key=fake))
+    assert fake not in masked
     assert "***" in masked
 
 
 def test_load_settings_from_env_and_types(tmp_path):
     env_file = tmp_path / ".env"
-    env_file.write_text('PACE_SECONDS="60"\n# comment\nPORT=8000\nANTHROPIC_API_KEY=sk-x\n')
+    env_file.write_text(
+        "PACE_SECONDS=\"60\"\n# comment\nPORT=8000\n"
+        "ANTHROPIC_API_KEY=fixture-value-not-real\n"
+    )
     s = load_settings(dotenv_path=env_file)
     assert s.pace_seconds == 60.0
     assert s.port == 8000
-    assert s.anthropic_api_key == "sk-x"
+    assert s.anthropic_api_key == "fixture-value-not-real"
     assert s.has_llm
 
 

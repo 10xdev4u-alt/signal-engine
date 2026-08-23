@@ -111,14 +111,27 @@ def cmd_fetch(args) -> int:
     for url, delay in client.backoff_events:
         console.print(f"[yellow]backing off {delay}s after block on {url}[/yellow]")
     if summary.breaker_tripped or comments_summary.breaker_tripped:
-        console.print(
-            f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] "
-            f"{summary.breaker_tripped or comments_summary.breaker_tripped}"
+        message = summary.breaker_tripped or comments_summary.breaker_tripped
+        from signal_engine.db import set_setting
+
+        set_setting(
+            conn, "last_breaker", f"{time.strftime('%Y-%m-%d')}: {message}"
         )
+        console.print(f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] {message}")
         return 1
     for post_id, count in comments_summary.fetched_counts:
         console.print(f"[green]{post_id}: {count} new comments[/green]")
     return 1 if summary.errors or comments_summary.errors else 0
+
+
+def cmd_digest(args) -> int:
+    from signal_engine.digest.daily import build_digest, write_digest_file
+
+    settings, conn = _open_db()
+    digest = build_digest(conn, date=args.date)
+    out = write_digest_file(digest, data_dir=settings.data_dir)
+    print(f"digest for {digest.date} written to {out} and /digest")
+    return 0
 
 
 def cmd_not_implemented(name: str):
@@ -178,7 +191,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("serve", help="dashboard on loopback").set_defaults(func=cmd_serve)
 
-    for future in ("digest", "report"):
+    p_digest = sub.add_parser("digest", help="generate the daily digest")
+    p_digest.add_argument("--date", default=None, help="ISO date, defaults to today")
+    p_digest.set_defaults(func=cmd_digest)
+
+    for future in ("report",):
         sub.add_parser(future).set_defaults(func=cmd_not_implemented(future))
     return parser
 

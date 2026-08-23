@@ -18,5 +18,5 @@ def test_cli_status_reports_missing_database(tmp_path, monkeypatch, capsys):
 def test_cli_unimplemented_command_exits_nonzero(capsys):
     from signal_engine.cli import main
 
-    assert main(["digest"]) == 1
+    assert main(["report"]) == 1
     assert "not implemented" in capsys.readouterr().err

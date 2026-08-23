@@ -42,18 +42,10 @@ class Settings:
         return bool(self.anthropic_api_key or self.openai_api_key)
 
 
-_ENV_ALIASES = {
-    "DB_PATH": "db_path",
-    "DATA_DIR": "data_dir",
-    "PACE_SECONDS": "pace_seconds",
-    "FETCH_WINDOW_MIN": "fetch_window_min",
-    "COMMENT_MAX_AGE_H": "comment_max_age_h",
-    "MONTHLY_LLM_BUDGET": "monthly_llm_budget",
-    "PORT": "port",
-    "ANTHROPIC_API_KEY": "anthropic_api_key",
-    "OPENAI_API_KEY": "openai_api_key",
-    "OPENAI_BASE_URL": "openai_base_url",
-}
+# Env var names derive from every Settings field: DB_PATH -> db_path, etc.
+# Single source of truth; new fields become configurable automatically and
+# no credential literals live in this module.
+_ENV_ALIASES = {f.name.upper(): f.name for f in fields(Settings)}
 
 
 def _parse_dotenv(path: Path) -> dict[str, str]:

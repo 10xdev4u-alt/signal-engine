@@ -62,9 +62,11 @@ def rebuild_clusters(conn: sqlite3.Connection, threshold: float = 0.4) -> int:
             cluster = clusters[best_index]
             cluster["members"].append(index)
             size = len(cluster["members"])
-            for tok in set(vec):
+            # rescale every component (union of tokens) so the centroid
+            # stays a true running mean as members accumulate
+            for tok in set(cluster["centroid"]) | set(vec):
                 cluster["centroid"][tok] = (
-                    cluster["centroid"].get(tok, 0.0) * (size - 1) + vec[tok]
+                    cluster["centroid"].get(tok, 0.0) * (size - 1) + vec.get(tok, 0.0)
                 ) / size
             cluster["tokens"].update(documents[index])
             assignment.append(best_index)
