@@ -42,21 +42,18 @@ class Settings:
         return bool(self.anthropic_api_key or self.openai_api_key)
 
 
-# Env var names are derived from field names: DB_PATH -> db_path, etc.
-# Single source of truth; no credential literals live in this module.
-_FIELD_NAMES = (
-    "db_path",
-    "data_dir",
-    "pace_seconds",
-    "fetch_window_min",
-    "comment_max_age_h",
-    "monthly_llm_budget",
-    "port",
-    "anthropic_api_key",
-    "openai_api_key",
-    "openai_base_url",
-)
-_ENV_ALIASES = {name.upper(): name for name in _FIELD_NAMES}
+_ENV_ALIASES = {
+    "DB_PATH": "db_path",
+    "DATA_DIR": "data_dir",
+    "PACE_SECONDS": "pace_seconds",
+    "FETCH_WINDOW_MIN": "fetch_window_min",
+    "COMMENT_MAX_AGE_H": "comment_max_age_h",
+    "MONTHLY_LLM_BUDGET": "monthly_llm_budget",
+    "PORT": "port",
+    "ANTHROPIC_API_KEY": "anthropic_api_key",
+    "OPENAI_API_KEY": "openai_api_key",
+    "OPENAI_BASE_URL": "openai_base_url",
+}
 
 
 def _parse_dotenv(path: Path) -> dict[str, str]:

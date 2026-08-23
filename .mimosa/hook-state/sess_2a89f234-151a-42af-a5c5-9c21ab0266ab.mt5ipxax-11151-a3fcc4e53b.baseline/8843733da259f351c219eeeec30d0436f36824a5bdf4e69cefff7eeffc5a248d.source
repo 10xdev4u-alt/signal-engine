@@ -111,13 +111,10 @@ def cmd_fetch(args) -> int:
     for url, delay in client.backoff_events:
         console.print(f"[yellow]backing off {delay}s after block on {url}[/yellow]")
     if summary.breaker_tripped or comments_summary.breaker_tripped:
-        message = summary.breaker_tripped or comments_summary.breaker_tripped
-        from signal_engine.db import set_setting
-
-        set_setting(
-            conn, "last_breaker", f"{time.strftime('%Y-%m-%d')}: {message}"
+        console.print(
+            f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] "
+            f"{summary.breaker_tripped or comments_summary.breaker_tripped}"
         )
-        console.print(f"[bold red]BREAKER TRIPPED — run stopped:[/bold red] {message}")
         return 1
     for post_id, count in comments_summary.fetched_counts:
         console.print(f"[green]{post_id}: {count} new comments[/green]")
