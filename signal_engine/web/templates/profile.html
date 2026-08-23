@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}r/{{ subreddit }} profile — Signal Engine{% endblock %}
+{% block content %}
+<h1>r/{{ subreddit }} profile</h1>
+{% if snapshots %}
+<p class="muted">generated {{ snapshots[0].generated_at }}</p>
+<pre style="white-space: pre-wrap; font-family: inherit;">{{ snapshots[0].snapshot_md }}</pre>
+{% else %}
+<p class="empty">No profile yet — the nightly builder lands in M2 (issue #10).</p>
+{% endif %}
+<p><a href="/status">← status</a></p>
+{% endblock %}

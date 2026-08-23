@@ -88,6 +88,18 @@ def test_load_settings_from_env_and_types(tmp_path):
     assert s.has_llm
 
 
+def test_process_environment_beats_dotenv(tmp_path):
+    from signal_engine.config import load_settings
+
+    env_file = tmp_path / ".env"
+    env_file.write_text("PACE_SECONDS=60\n")
+    s = load_settings(
+        dotenv_path=env_file, environ={"PACE_SECONDS": "90", "DB_PATH": "/x/t.db"}
+    )
+    assert s.pace_seconds == 90.0  # process env wins over the file
+    assert s.db_path == "/x/t.db"
+
+
 def test_settings_repr_is_valid_dataclass_shape():
     assert re.match(r"^Settings\(", repr(Settings()))
 

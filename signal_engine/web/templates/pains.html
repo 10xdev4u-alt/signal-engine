@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Pains — Signal Engine{% endblock %}
+{% block content %}
+<h1>Pain clusters</h1>
+{% if clusters %}
+<table>
+  <tr><th>cluster</th><th class="num">mentions</th><th class="num">desperation</th><th class="num">seen</th></tr>
+  {% for c in clusters %}
+  <tr>
+    <td><a href="/pains/{{ c.id }}">{{ c.label }}</a></td>
+    <td class="num">{{ c.mention_count }}</td>
+    <td class="num score">{{ "%.1f" | format(c.desperation_score) }}</td>
+    <td class="num muted">{{ c.first_seen or "?" }} → {{ c.last_seen or "?" }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">Nothing collected yet — run <code>./run.sh fetch</code> then <code>./run.sh analyze</code>.</p>
+{% endif %}
+{% endblock %}
