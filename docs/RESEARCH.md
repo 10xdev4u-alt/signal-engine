@@ -1,78 +1,99 @@
-# RESEARCH.md — verified findings this product is built on
+# Research notes
 
-All findings verified live on **2026-08-22/23** unless noted. Every design
-decision in the PRD traces back to a line here.
+Findings verified live on 2026-08-22 and 2026-08-23 unless marked otherwise.
+Every design decision in the PRD traces back to a line here.
 
-## 1. Reddit public RSS feeds — VERIFIED WORKING
+## 1. Reddit public RSS feeds work
 
-- Appending `.rss` to subreddit / post / comment URLs returns valid **Atom**
-  feeds with no API key and no login. Verified live against `r/news`.
-- Post feed entry fields: title, thread permalink, id (`t3_…`), published +
-  updated timestamps, author (`/u/name`), category (subreddit). Self-text
-  posts include body HTML; link posts contain only Reddit's attribution footer.
-- Comment feed (`.rss` on a post comments URL): first entry is the submission,
-  then each comment with author, comment permalink, timestamp, and full
-  comment body HTML.
-- Authenticated/private feed params (`?feed=…&user=…`) are breaking as of
-  July 2026 — we rely only on public feeds.
+Appending `.rss` to a subreddit, post, or comment URL returns a valid Atom
+feed. No API key, no login. We confirmed this live against r/news.
 
-## 2. Rate limits & IP reputation — THE LOAD-BEARING CONSTRAINT
+A post feed entry carries the title, thread permalink, id (`t3_...`),
+published and updated timestamps, author, and subreddit category. Self-text
+posts include the body HTML; link posts carry only an attribution footer.
+A comment feed starts with the submission, then lists each comment with
+author, comment permalink, timestamp, and full body HTML.
 
-- Reddit publishes **no official unauthenticated per-IP rate limit**. Some
-  developers sustain ~1 req/sec with `Retry-After` handling; others get 403s.
-- Access is gated by **IP reputation**: datacenter/VPS/cloud egress
-  (Railway, AWS, generic VPS) is widely reported blocked with 403 "Blocked"
-  or 429 (Miniflux #1432, RSS-Bridge #4067/#4278, last30days-skill #899).
-- **Consequence:** the fetcher runs on the user's residential connection,
-  paced conservatively (default 1 request / 45–60 s), with exponential
-  backoff on 429/403 and a full stop-breaker after repeated blocks.
-  This kills the "host it on Railway" idea from the source guide — that
-  guide's own hosting choice would get its reading side blocked.
+Authenticated feed parameters (`?feed=...&user=...`) started failing around
+July 2026. We rely only on public feeds.
 
-## 3. Legal / policy posture — WHY WE ONLY READ, AND POLITELY
+## 2. Rate limits and IP reputation are the real constraint
 
-- Reddit User Agreement (eff. 2026-07-01): scraping without prior written
-  consent is prohibited; conditional permission to crawl per robots.txt.
-  Account selling/transfers prohibited without written approval.
-- Public Content Policy (upd. 2024-05-10): non-commercial sharing welcomed;
-  commercial use needs a license ("talk to us"). Reddit sued Anthropic
-  (Jun 2025, unresolved) and Perplexity et al. (Oct 2025; motion to dismiss
-  mostly rejected Jul 31 2026) over scraping.
-- Sitewide Rules: Rule 2 bans spam/"content manipulation", Rule 5 requires
-  authenticity. r/Entrepreneur explicitly bans AI-generated posts AND all
-  self-promotion outside weekly threads; r/smallbusiness and r/sidehustle
-  similar. Reddit is rolling out LLM moderation ("Rules Hub") in 2026 and
-  cracking down on "AI marketing slop".
-- **Consequence:** Signal Engine is a personal, non-commercial research
-  instrument: polite RSS reads from a home IP, human reads the output,
-  distribution happens through channels the user owns (site, newsletter,
-  transparent participation). No posting automation, ever. If this ever
-  scales commercially, switch ingestion to the official Data API free tier
-  (legacy OAuth limit: 60 req/min; commercial tier ~$0.24/1k calls).
+Reddit publishes no official rate limit for unauthenticated access. Some
+developers sustain about one request per second with careful Retry-After
+handling. Others get blocked outright.
 
-## 4. The source guide ("reddit sales system") — assessed 2026-08-22
+Access is gated by IP reputation. Datacenter egress gets 403 "Blocked" or
+429 responses constantly; Miniflux operators, RSS-Bridge instances, and
+VPS-hosted scripts all report this. The guide that inspired this project
+planned to run its fetcher on Railway, which would have been blocked on
+day one by its own hosting choice.
 
-- Author @everestchris6 (~24k followers) runs atonomi.ai, an AI automation
-  agency; the guide is a lead-magnet funnel. No verified income claims.
-- Technically accurate parts: RSS trick, model lineup (Claude Opus 5 real,
-  released 2026-07-24; Sonnet 5 $2/$10 per MTok; Haiku 4.5 $1/$5; Gemini
-  2.5 Flash-Lite $0.10/$0.40; Kimi K3 real, $3/$15), <$100/mo compute math.
-- Broken parts: buying karma'd accounts (bannable), mass AI-drafted replies
-  (astroturfing under Rules 2/5), cloud-hosted fetching (IP-blocked),
-  "passive" framing (it's a part-time job), target subs already ban the tactic.
-- Nous Research's Hermes Agent is real (MIT, self-hostable, Telegram gateway)
-  but unnecessary here — we don't need an always-on chat agent, just cron jobs.
+So the fetcher runs on your machine over a residential connection, paced at
+45 seconds between requests, backing off exponentially on 429 and 403, with
+a circuit breaker after five blocks in a row.
+
+## 3. The legal posture: read politely, never post
+
+The Reddit User Agreement (effective July 2026) prohibits scraping without
+written consent and prohibits selling or transferring accounts. Reddit sued
+Anthropic in June 2025 over scraping and Perplexity plus three scraper firms
+in October 2025; the Perplexity case survived dismissal in July 2026.
+
+Sitewide Rule 2 bans spam and content manipulation. Rule 5 requires
+authenticity. The big subreddits make this concrete: r/entrepreneur bans
+AI-generated posts outright and all self-promotion outside weekly threads;
+r/smallbusiness and r/sidehustle restrict promotion similarly. In 2026
+Reddit rolled out LLM moderation ("Rules Hub") across hundreds of
+communities and publicly targeted AI marketing slop.
+
+The litigation ledger has two entries. Reddit v. Perplexity survived
+dismissal in July 2026. Reddit v. Anthropic was remanded to San Francisco
+Superior Court on March 30, 2026 (case CGC-25-625892); a demurrer hearing
+took place on August 12, 2026, and no ruling had been reported by our
+cutoff of 2026-08-23.
+
+Our conclusion: Signal Engine stays a personal research instrument. It reads
+public feeds from a home IP at a polite pace, a human reads the output, and
+distribution happens through channels you own. This posture lowers risk but
+grants no exemption: RSS ingestion remains subject to Reddit's scraping
+restrictions, and the sanctioned path for anything bigger is the official
+Data API, which lists 10 queries per minute without OAuth, 100 queries per
+minute with OAuth, and about $0.24 per thousand calls for third-party apps
+that need more.
+
+## 4. Assessment of the source guide
+
+The guide that started this ("how to build a reddit sales system") comes
+from an account selling AI automation services. We could not verify any of
+its income claims.
+
+The engineering claims mostly hold: the RSS trick works, the model names
+were real (Claude Opus 5 shipped July 2026), and the compute math lands
+under $100/month if cheap models do volume reading. Nous Research's Hermes
+Agent exists too.
+
+The strategy core fails three ways. Buying karma accounts breaks the User
+Agreement and those accounts die fast. Mass-drafted replies break Rules 2
+and 5 no matter whose finger clicks paste. And cloud-hosted fetching gets
+IP-blocked. The valuable part was always the audience research method, so
+that is what we kept.
 
 ## 5. Market signal
 
-- GummySearch — the leading SaaS Reddit audience-research tool ($29–199/mo,
-  thousands of users) — **shut down 2025-11-30**. Demand existed; the gap is
-  open for a lean self-hosted tool whose cost basis is ~$0.
-- Whop seller economics (verified docs): 2.7% + $0.30 domestic card — viable
-  checkout when the user later sells a product discovered via this engine.
+GummySearch, the largest SaaS tool in this niche, charged $29 to $199 per
+month and shut down on 2025-11-30. Demand for Reddit audience research
+existed. Nothing lean and self-hosted replaced it, so we are building it.
 
-## 6. Explicitly unverified / do-not-rely
+Whop's seller fees check out at 2.7% plus $0.30 per domestic card sale,
+which is viable checkout when a product discovered through this engine is
+ready to sell.
 
-- Any official unauthenticated rate-limit number (none exists).
-- Post-2023 "100 QPM free API tier" figure (unconfirmed on official pages).
-- 2026 developments in Reddit v. Anthropic (nothing found).
+## 6. Things we could not verify
+
+No official unauthenticated rate-limit number for RSS exists; Reddit's API
+facts page now publishes 10 QPM without OAuth, which supersedes the older
+unofficial figures. The post-2023 "100 queries per minute free tier" figure
+matches the OAuth tier on that page. We found no reported 2026 ruling in
+the Anthropic case, only the remand and the August hearing. Treat anything
+beyond these as unknown.

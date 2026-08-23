@@ -1,39 +1,41 @@
 # Signal Engine
 
-A local-first Reddit audience-research system. It listens to public subreddit
-RSS feeds, builds history, mines recurring pain points and the exact language
-people use, maintains living community profiles, and serves a daily digest
-dashboard — so you can find desperate audiences and build legitimate products
-for channels you own.
+A local-first Reddit audience-research system. It listens to public
+subreddit RSS feeds, stores what it sees, ranks the problems that keep
+coming up, maintains a written profile of each community, and serves a
+digest every morning. You read the digest, then decide what to build.
 
-**Design law:** this tool only *reads*. It never logs into Reddit, never posts,
-never drafts content for you to paste into threads. Listening is research;
-astroturfing is how accounts die (see `docs/RESEARCH.md` for the receipts).
+The tool only reads. It never logs into Reddit, never posts, and never
+drafts content for anyone to paste into threads. Reading public forums is
+research. Impersonating customers is how accounts die. Our research notes
+have the receipts: see `docs/RESEARCH.md`.
 
 ## Status
 
-Planning complete, implementation starting. See:
+Planning and milestone M0 are done. M1 added comments ingestion, the
+analyzer, the dashboard, the daily digest and search. See:
 
-- [`docs/PRD.md`](docs/PRD.md) — product requirements (strict schema)
-- [`docs/RESEARCH.md`](docs/RESEARCH.md) — verified platform facts behind every design decision
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — modules, data model, runtime topology
-- [`docs/issues/BACKLOG.md`](docs/issues/BACKLOG.md) — issue index across 5 milestones
-- [`docs/GUARDRAILS.md`](docs/GUARDRAILS.md) — enforced repo protections
-- [`docs/adr/`](docs/adr/) — architecture decision records (RSS-only, local-first, LLM-optional)
-- [`AGENTS.md`](AGENTS.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) — the agentic research → issue → PR loop
+- `docs/PRD.md`, the product requirements with measurable targets
+- `docs/RESEARCH.md`, verified platform facts behind every design decision
+- `docs/ARCHITECTURE.md`, modules, data model, runtime topology
+- `docs/issues/BACKLOG.md`, the issue index across five milestones
+- `docs/GUARDRAILS.md`, enforced repo protections
+- `docs/adr/`, architecture decision records
+- `AGENTS.md` and `CONTRIBUTING.md`, the development loop contract
 
-## Quickstart (once M0 lands)
+## Quickstart
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"       # add ,llm to enable Claude-assisted profiling
 signal-engine add-subreddit smallbusiness
 signal-engine fetch          # one polite pull
 signal-engine serve          # dashboard at http://localhost:7788
-crontab -l                   # 30-min fetch + 08:00 digest entries documented in issue #004/#008
+crontab -l                   # entries live in docs/crontab.txt
 ```
 
-## Stack (decided)
+## Stack
 
-Python 3.12+, SQLite (+FTS5), FastAPI + Jinja2 + HTMX, httpx + feedparser.
-LLM layer is optional and pluggable: no key = deterministic stats only;
-`ANTHROPIC_API_KEY` set = Claude-assisted profiling and intent scoring.
+Python 3.12+, SQLite with FTS5, FastAPI with Jinja2 templates. Data lives
+on your machine. The LLM layer is optional: with no API key the engine runs
+on deterministic statistics alone, and setting `ANTHROPIC_API_KEY` turns on
+Claude-assisted profiling and intent scoring under a hard monthly budget.

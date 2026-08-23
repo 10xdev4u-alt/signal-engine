@@ -19,7 +19,7 @@ signal-engine/
 │   ├── migrations/           # 001_init.sql, 002_fts.sql, ... (numbered)
 │   ├── sources/
 │   │   ├── base.py           # FeedSource protocol: iter_entries() -> Entry
-│   │   ├── rss.py            # RedditRssSource (adapter — ONLY place that
+│   │   ├── rss.py            # RedditRssSource (adapter, ONLY place that
 │   │                         #   knows Atom field layout)
 │   │   └── polite.py         # PacedClient: httpx wrapper, min-interval,
 │   │                         #   Retry-After honoring, backoff, breaker
@@ -77,13 +77,13 @@ unit; it only reads the DB.
 
 ## Key invariants
 
-1. **Single writer per process; SQLite WAL mode** — cron jobs may overlap,
+1. **Single writer per process; SQLite WAL mode**, cron jobs may overlap,
    WAL + busy_timeout=30s keeps them safe.
-2. **Idempotency everywhere** — every ingest step keyed on Reddit's native
+2. **Idempotency everywhere**, every ingest step keyed on Reddit's native
    ids; reruns are free.
-3. **Network isolation in tests** — parsers/analyzer consume frozen fixtures;
+3. **Network isolation in tests**, parsers/analyzer consume frozen fixtures;
    `PacedClient` takes an injectable clock/sleeper.
-4. **LLM is an additive layer** — removing the key must never change control
+4. **LLM is an additive layer**, removing the key must never change control
    flow beyond hiding enriched fields.
-5. **The RSS adapter is the only Reddit-format-aware code** — if Reddit
+5. **The RSS adapter is the only Reddit-format-aware code**, if Reddit
    changes fields or we swap to the official API, one module changes.
