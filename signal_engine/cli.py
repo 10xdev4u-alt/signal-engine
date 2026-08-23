@@ -191,6 +191,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("serve", help="dashboard on loopback").set_defaults(func=cmd_serve)
 
+    p_digest = sub.add_parser("digest", help="generate the daily digest")
+    p_digest.add_argument("--date", default=None, help="ISO date, defaults to today")
+    p_digest.set_defaults(func=cmd_digest)
+
     for future in ("report",):
         sub.add_parser(future).set_defaults(func=cmd_not_implemented(future))
     return parser

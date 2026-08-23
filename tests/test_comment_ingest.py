@@ -69,19 +69,19 @@ def test_only_recent_posts_selected_oldest_first(db):
 
 def test_budget_caps_requests_per_run(db):
     for i in range(5):
-        insert_post(db, f"p{i}", "2026-08-22T12:00:00+00:00")
+        insert_post(db, f"p{i}", _iso(NOW - 3600))
     calls: list[str] = []
-    fetch_comments(db, comment_client(calls), max_age_h=48, budget=2)
+    fetch_comments(db, comment_client(calls), max_age_h=48, budget=2, now_fn=lambda: NOW)
     assert len(calls) == 2
 
 
 def test_done_posts_never_refetched(db):
-    insert_post(db, "p1", "2026-08-22T12:00:00+00:00")
+    insert_post(db, "p1", _iso(NOW - 3600))
     calls: list[str] = []
-    fetch_comments(db, comment_client(calls), max_age_h=48, budget=5)
+    fetch_comments(db, comment_client(calls), max_age_h=48, budget=5, now_fn=lambda: NOW)
     first_count = len(calls)
     assert first_count == 1
-    fetch_comments(db, comment_client(calls), max_age_h=48, budget=5)
+    fetch_comments(db, comment_client(calls), max_age_h=48, budget=5, now_fn=lambda: NOW)
     assert len(calls) == first_count  # zero new requests
 
 
@@ -93,8 +93,8 @@ def test_error_response_still_marks_done(db):
         pace_seconds=1.0, sleep=lambda s: None, now=lambda: 0.0,
         transport=httpx.MockTransport(handler),
     )
-    insert_post(db, "p_dead", "2026-08-22T12:00:00+00:00")
-    summary = fetch_comments(db, client, max_age_h=48, budget=5)
+    insert_post(db, "p_dead", _iso(NOW - 3600))
+    summary = fetch_comments(db, client, max_age_h=48, budget=5, now_fn=lambda: NOW)
     assert summary.errors == [("p_dead", "HTTP 404")]
     done = db.execute(
         "SELECT comments_done_at FROM posts WHERE id = 'p_dead'"

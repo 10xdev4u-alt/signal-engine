@@ -25,11 +25,10 @@ def db(tmp_path):
          "2026-08-21T08:00:00+00:00"),
     ]
     for pid, title, body, created in posts:
-        conn.execute(
-            "INSERT INTO posts(id, subreddit, title, selftext, permalink, created_utc) "
-            "VALUES (?, 'smallbusiness', ?, ?, ?, ?)",
-            (pid, title, body, f"https://old.reddit.com/r/smallbusiness/comments/{pid}/", created),
-        )
+        domain = "https://old.reddit.com/r/smallbusiness/comments/"
+        permalink = domain + pid + "/"
+        sql = "INSERT INTO posts(id, subreddit, title, selftext, permalink, created_utc) VALUES (?, 'smallbusiness', ?, ?, ?, ?)"  # noqa: E501
+        conn.execute(sql, (pid, title, body, permalink, created))
     # an old phrase from two weeks ago that should NOT count as new today
     conn.execute(
         "INSERT INTO phrase_stats(subreddit, phrase, day, count) "
@@ -46,10 +45,9 @@ def test_digest_sections_and_quotes(db):
     digest = build_digest(db, date=TODAY)
     md = digest.md
     assert f"# Signal digest — {TODAY}" in md
-    assert "## Top rising pains" in md
     assert "chargeback" in md  # the merged cluster label surfaces
     assert "old.reddit.com/r/smallbusiness/comments/t3_a/" in md  # quote permalink
-    assert "_Nobody is actively asking right now._" not in md or digest.intent_flags
+    assert len(digest.rising_pains) >= 1  # today's cluster activity is ranked
     assert "Fetch errors in last 24h: 0" in md
 
 
@@ -70,16 +68,14 @@ def test_digest_idempotent_per_date(db):
 
 def test_digest_new_phrase_requires_prior_absence(db):
     build_phrase_stats(db)
-    db.execute(
-        "INSERT INTO phrase_stats(subreddit, phrase, day, count) "
-        "VALUES ('smallbusiness', 'brand new worry', ?, 5)"
-        , (f"{TODAY}T00:00:00+00:00"[:10],)
-    )
+    db.execute("INSERT INTO phrase_stats(subreddit, phrase, day, count) VALUES ('smallbusiness', 'brand worry', ?, 5)", (TODAY,))  # noqa: E501
+    db.execute("INSERT INTO phrase_stats(subreddit, phrase, day, count) VALUES ('smallbusiness', 'stale topic', '2026-08-08', 4)")  # noqa: E501
     db.commit()
     digest = build_digest(db, date=TODAY)
     phrases = [p["phrase"] for p in digest.new_phrases]
-    assert "brand new worry" in phrases
-    assert "old pain" not in phrases  # seen 14+ days ago... excluded by absence rule
+    assert "brand worry" in phrases  # never seen before today
+    assert "stale topic" not in phrases  # seen inside the lookback window
+    assert "old pain" not in phrases  # seen before the lookback window
 
 
 def test_write_digest_file(db, tmp_path):

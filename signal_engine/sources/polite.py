@@ -57,6 +57,15 @@ class PacedClient:
         # every raw HTTP attempt, including blocked ones: (url, status, bytes)
         self.attempt_log: list[tuple[str, int, int]] = []
 
+    def close(self) -> None:
+        self._client.close()
+
+    def __enter__(self) -> PacedClient:
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        self.close()
+
     def get(self, url: str, extra_headers: dict[str, str] | None = None) -> httpx.Response:
         if self.consecutive_blocks >= self.max_consecutive_blocks:
             raise CircuitBreakerOpen(
@@ -80,10 +89,9 @@ class PacedClient:
                     )
                 delay = _retry_after_seconds(response)
                 if delay is None:
-                    delay = min(
-                        self.pace_seconds * (2 ** min(self.consecutive_blocks, 7)),
-                        MAX_BACKOFF_SECONDS,
-                    )
+                    delay = self.pace_seconds * (2 ** min(self.consecutive_blocks, 7))
+                # server-supplied Retry-After gets the same ceiling as ours
+                delay = min(delay, MAX_BACKOFF_SECONDS)
                 self.backoff_events.append((url, int(delay)))
                 self._sleep(delay)
                 continue
