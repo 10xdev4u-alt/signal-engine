@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -13,11 +13,23 @@ TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 
 def sanitize_fts_query(raw: str) -> str:
-    """Build a safe FTS5 MATCH expression: every term becomes a quoted phrase."""
+    """Build a safe FTS5 MATCH expression.
+
+    Bare terms get a trailing prefix star so `chargeback` matches
+    `chargebacks` (FTS5 does not stem). Explicitly quoted phrases keep
+    exact semantics — no star.
+    """
     terms: list[str] = []
-    for quoted, bare in re.findall(r'"([^"]+)"|(\S+)', raw):
-        phrase = (quoted or bare).replace('"', " ").strip()
-        if phrase:
+    for match in re.finditer(r'"([^"]+)"|(\S+)', raw):
+        quoted_phrase = match.group(1)
+        phrase = (
+            quoted_phrase if quoted_phrase is not None else match.group(2)
+        ).replace('"', " ").strip()
+        if not phrase:
+            continue
+        if quoted_phrase is not None:
+            terms.append(f'"{phrase}"')
+        else:
             terms.append(f'"{phrase}"*')
     return " ".join(terms)
 
@@ -105,7 +117,7 @@ def create_app() -> FastAPI:
         q: str = "",
         sub: str = "",
         type: str = "",  # noqa: A002 - matches the query-string name
-        frm: str = "",
+        from_: str = Query(default="", alias="from"),
         to: str = "",
     ):
         conn = _db()
@@ -124,15 +136,17 @@ def create_app() -> FastAPI:
                 " AND (? = '' OR created_utc <= ?)"
                 " ORDER BY created_utc DESC LIMIT 200"
             )
+            date_from = from_
+            date_to_inclusive = to_inclusive
             params = [match_expr]
             params.append(sub)
             params.append(sub)
             params.append(type_filter)
             params.append(type_filter)
-            params.append(frm)
-            params.append(frm)
+            params.append(date_from)
+            params.append(date_from)
             params.append(to)
-            params.append(to_inclusive)
+            params.append(date_to_inclusive)
             rows = conn.execute(sql, params)
             results = [dict(r) for r in rows]
         indexed = conn.execute(
@@ -145,7 +159,7 @@ def create_app() -> FastAPI:
                 "q": q,
                 "sub": sub,
                 "type": type_filter if match_expr else type,
-                "frm": frm,
+                "from": from_,
                 "to": to,
                 "results": results,
                 "indexed": indexed,

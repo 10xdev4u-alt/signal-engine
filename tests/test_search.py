@@ -63,9 +63,14 @@ def test_search_finds_term_and_excludes_others(client):
 def test_quoted_phrase_narrows(client):
     http, conn = client
     seed_search_corpus(conn)
+    # a near-match that exact-phrase semantics must exclude
+    upsert_post(conn, make_post(
+        "s9", "Dispute templates collection", "many dispute templates here",
+        "2026-08-22T10:00:00+00:00"))
     phrase_page = http.get("/search", params={"q": '"dispute template"'})
     assert phrase_page.status_code == 200
-    assert "comments/s1/" in phrase_page.text  # only the matching post links out
+    assert "comments/s1/" in phrase_page.text  # the exact match links out
+    assert "comments/s9/" not in phrase_page.text  # plural near-match excluded
 
 
 def test_search_filters_narrow_results(client):
@@ -73,7 +78,7 @@ def test_search_filters_narrow_results(client):
     seed_search_corpus(conn)
     no_comments = http.get("/search", params={"q": "chargeback", "type": "comment"})
     assert "No matches" in no_comments.text
-    future_only = http.get("/search", params={"q": "chargeback", "frm": "2026-08-25"})
+    future_only = http.get("/search", params={"q": "chargeback", "from": "2026-08-25"})
     assert "No matches" in future_only.text
     other_sub = http.get("/search", params={"q": "chargeback", "sub": "teaching"})
     assert "No matches" in other_sub.text
