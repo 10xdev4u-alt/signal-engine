@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Search — Signal Engine{% endblock %}
+{% block content %}
+<h1>Search history</h1>
+<form method="get" action="/search" style="display:flex; gap:.5rem; flex-wrap:wrap; margin: .8rem 0;">
+  <input type="text" name="q" value="{{ q }}" placeholder='e.g. chargebacks or "dispute template"' style="flex:1; min-width:14rem; padding:.35rem .6rem;">
+  <input type="text" name="sub" value="{{ sub }}" placeholder="subreddit" style="width:9rem; padding:.35rem .6rem;">
+  <select name="type" style="padding:.35rem .6rem;">
+    <option value="">all</option>
+    <option value="post" {% if type == 'post' %}selected{% endif %}>posts</option>
+    <option value="comment" {% if type == 'comment' %}selected{% endif %}>comments</option>
+  </select>
+  <input type="date" name="frm" value="{{ frm }}" style="padding:.3rem;">
+  <input type="date" name="to" value="{{ to }}" style="padding:.3rem;">
+  <button type="submit" style="padding:.35rem 1rem;">search</button>
+</form>
+<p class="muted">{{ indexed }} items indexed</p>
+{% if results %}
+<table>
+  <tr><th>type</th><th>sub</th><th>title</th><th>match</th><th>date</th><th>link</th></tr>
+  {% for r in results %}
+  <tr>
+    <td>{{ r.ref_type }}</td>
+    <td>r/{{ r.subreddit }}</td>
+    <td>{{ r.title }}</td>
+    <td>{{ r.snip | safe }}</td>
+    <td class="muted">{{ r.created_utc[:10] }}</td>
+    <td><a href="{{ r.permalink }}" rel="noreferrer">↗</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<p class="muted">showing {{ results | length }} result(s), capped at 200</p>
+{% elif q %}
+<p class="empty">No matches for this query.</p>
+{% else %}
+<p class="empty">Type a query above — supports "exact phrases" and multiple terms (AND).</p>
+{% endif %}
+{% endblock %}
