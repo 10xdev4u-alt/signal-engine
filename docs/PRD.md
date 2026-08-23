@@ -1,10 +1,10 @@
-# PRD — Signal Engine v1.0
+# PRD: Signal Engine v1.0
 
-## 1. Executive Summary
+## 1. Executive summary
 
 **Problem statement.** Solo builders have no systematic way to find audiences
 with urgent, repeated, money-adjacent problems, or to learn the exact language
-those audiences use — the SaaS tools that did this shut down or push users
+those audiences use, because the SaaS tools that did this shut down or push users
 toward rule-breaking automation that gets accounts banned.
 
 **Proposed solution.** A local-first engine that politely monitors public
@@ -22,7 +22,7 @@ per-subreddit profiles updated nightly, and renders a daily digest dashboard.
 | 4 | Nightly profile updates | Dated changelog entry appended ≥6 nights/7 per active subreddit |
 | 5 | Monthly operating cost | $0 without LLM key; ≤$25/month with Claude key enabled |
 
-## 2. User Experience & Functionality
+## 2. User experience and functionality
 
 ### Personas
 
@@ -34,7 +34,7 @@ per-subreddit profiles updated nightly, and renders a daily digest dashboard.
 
 ### User Stories & Acceptance Criteria
 
-**US1 — Scheduled listening.**
+**US1. Scheduled listening.**
 As an operator, I want subreddits fetched automatically so history
 accumulates while I sleep.
 - AC: `signal-engine add-subreddit <name>` registers a sub; cron-driven
@@ -45,7 +45,7 @@ accumulates while I sleep.
 - AC: Re-fetching an already-stored post/comment is idempotent (no dupes).
 - AC: `signal-engine status` prints per-sub last-success, counts, error rate.
 
-**US2 — Morning digest.**
+**US2. Morning digest.**
 As an operator, I want a one-page digest each morning so I decide in 10 minutes.
 - AC: Generated daily at 08:00 local (cron), also rendered at `/digest`.
 - AC: Sections: top rising pains (ranked by frequency + frustration +
@@ -54,7 +54,7 @@ As an operator, I want a one-page digest each morning so I decide in 10 minutes.
 - AC: Every pain point shows ≥3 verbatim quotes, each linking to its
   comment/post permalink, plus first-seen / last-seen dates and mention count.
 
-**US3 — Living community profiles.**
+**US3. Living community profiles.**
 As an operator, I want auto-maintained profiles per subreddit so I understand
 each audience deeply before acting on it.
 - AC: Markdown file per sub under `profiles/<sub>.md`: demographics,
@@ -65,7 +65,7 @@ each audience deeply before acting on it.
 - AC: Without LLM key, the profile still renders stats-derived sections
   (top phrases, active hours, top threads); LLM sections appear when key set.
 
-**US4 — Buying-intent detection.**
+**US4. Buying-intent detection.**
 As an operator, I want "actively looking for a solution" flagged separately
 from venting so I never waste time on complaints.
 - AC: Each post/comment scored 1–5 intent. Heuristic scorer always runs
@@ -73,7 +73,7 @@ from venting so I never waste time on complaints.
   "how do I fix"); LLM re-scores 3+ when key present.
 - AC: Digest lists only 4–5 as actionable; 1–3 stored for trends.
 
-**US5 — Niche discovery sweep.**
+**US5. Niche discovery sweep.**
 As an operator without a niche, I want broad-domain subreddits swept so
 recurring cross-community pains reveal where desperate buyers cluster.
 - AC: A curated seed list (~15 subs across money/health/productivity/
@@ -85,13 +85,13 @@ recurring cross-community pains reveal where desperate buyers cluster.
   (medical, legal, financial advice) under a caution section, excluded from
   ranking.
 
-**US6 — Full-history search.**
+**US6. Full-history search.**
 As an operator, I want full-text search over everything collected so I can
 investigate any hunch.
 - AC: SQLite FTS5 across titles + bodies + comments; results page filters by
   sub, date range, type (post/comment), min score; permalinks included.
 
-**US7 — Graceful degradation.**
+**US7. Graceful degradation.**
 As an operator, I want the system fully useful with zero API keys.
 - AC: No key → deterministic pipeline only; UI hides LLM-dependent fields;
   nothing errors. Key set → profiling/intent enrichment activates.
@@ -102,9 +102,9 @@ As an operator, I want the system fully useful with zero API keys.
 - No login/authenticated Reddit access; public feeds/API free tier only.
 - No multi-user/SaaS mode; single-operator localhost tool.
 - No product-builder or checkout integration (v2 decision).
-- No VPN/proxy rotation — IP-reputation evasion is out on principle.
+- No VPN/proxy rotation, IP-reputation evasion is out on principle.
 
-## 3. AI System Requirements
+## 3. AI system requirements
 
 - **Tools/providers:** Anthropic Messages API via `anthropic` SDK behind a
   `Provider` interface (`complete(system, user, max_tokens) -> str`);
@@ -119,7 +119,7 @@ As an operator, I want the system fully useful with zero API keys.
   profile diff review (yesterday vs today rendered side-by-side at
   `/profile/<sub>?diff=1`). Target: P@10 ≥ 0.7 (KPI 3).
 
-## 4. Technical Specifications
+## 4. Technical specifications
 
 ### Architecture overview
 
@@ -138,7 +138,7 @@ cron ──▶ signal-engine digest       (08:00 daily)
 FastAPI dashboard (localhost:7788): /digest /pains /profile/<sub> /search /status
 ```
 
-Components are separate CLI invocations sharing one DB — crash-safe, testable,
+Components are separate CLI invocations sharing one DB, crash-safe, testable,
 no long-running daemon required.
 
 ### Integration points
@@ -159,9 +159,9 @@ no long-running daemon required.
    desperation_score, caution_flag)`
 - `cluster_members(cluster_id, ref_type[post|comment], ref_id, quote, score)`
 - `intent_scores(ref_type, ref_id, heuristic_score, llm_score NULL, scored_at)`
-- `profiles(subreddit, snapshot_md, generated_at)` — append-only history
+- `profiles(subreddit, snapshot_md, generated_at)`, append-only history
 - `digests(id, date, md, json)`
-- `settings(key, value)` — pacing, budgets, model names, seed lists
+- `settings(key, value)`, pacing, budgets, model names, seed lists
 - FTS5 virtual table `search(posts/comments)` kept in sync on insert.
 
 ### Security & privacy
@@ -169,20 +169,20 @@ no long-running daemon required.
 - Runs and stores everything on the operator's machine; no telemetry.
 - Reddit credentials: none exist. LLM key lives in `.env` (gitignored).
 - Collected content stays local; prompts sent to Anthropic contain quoted
-  third-party text — documented risk, accepted for personal research scale;
+  third-party text, documented risk, accepted for personal research scale;
   provider can be swapped/self-hosted via OpenAI-compatible interface.
 
-## 5. Risks & Roadmap
+## 5. Risks and roadmap
 
 ### Phased rollout
 
-- **M0 — Foundation (issues #001–#004):** repo/tooling, schema, fetcher,
+- **M0, Foundation (issues #001–#004):** repo/tooling, schema, fetcher,
   scheduler. Exit: 7 days unattended collection on 3 subs, KPI 1 green.
-- **M1 — Insight (issues #005–#009):** comments ingestion, analyzer,
+- **M1, Insight (issues #005–#009):** comments ingestion, analyzer,
   dashboard, digest, search. Exit: KPI 2 met for 5 consecutive days.
-- **M2 — Intelligence (#010–#011):** LLM adapter, profiles, language mining,
+- **M2, Intelligence (#010–#011):** LLM adapter, profiles, language mining,
   LLM intent. Exit: KPI 4 met one week with key set.
-- **M3 — Discovery & proof (#012–#013):** niche sweep, weekly report,
+- **M3, Discovery & proof (#012–#013):** niche sweep, weekly report,
   eval harness. Exit: KPI 3 measured twice; first go/no-go decision on a
   discovered niche.
 
