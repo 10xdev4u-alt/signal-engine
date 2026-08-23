@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Digest — Signal Engine{% endblock %}
+{% block content %}
+<h1>Daily digest {% if date %}<span class="muted">{{ date }}</span>{% endif %}</h1>
+{% if markdown %}
+<pre style="white-space: pre-wrap; font-family: inherit;">{{ markdown }}</pre>
+{% else %}
+<p class="empty">No digest yet. The generator lands with issue #8; until then, browse <a href="/pains">pains</a> directly.</p>
+{% endif %}
+{% endblock %}

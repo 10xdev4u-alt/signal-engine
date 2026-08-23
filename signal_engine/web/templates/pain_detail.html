@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ cluster.label }} — Signal Engine{% endblock %}
+{% block content %}
+<h1>{{ cluster.label }}</h1>
+<p><span class="score">{{ cluster.mention_count }} mentions</span> ·
+   desperation {{ "%.1f" | format(cluster.desperation_score) }} ·
+   <a href="/pains">← all pains</a></p>
+<h2>Evidence</h2>
+{% for m in members %}
+<blockquote class="quote">
+  {{ m.quote }}
+  {% if m.permalink %}<div class="muted"><a href="{{ m.permalink }}" rel="noreferrer">{{ m.ref_type }} ↗</a></div>{% endif %}
+</blockquote>
+{% else %}
+<p class="empty">No stored quotes for this cluster.</p>
+{% endfor %}
+{% endblock %}

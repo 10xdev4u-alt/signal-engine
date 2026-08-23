@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Signal Engine{% endblock %}</title>
+<style>
+  :root { --ink: #16181d; --muted: #6b7280; --line: #e5e7eb; --accent: #b45309; }
+  body { font-family: system-ui, -apple-system, sans-serif; color: var(--ink);
+         max-width: 60rem; margin: 0 auto; padding: 1rem 1.5rem 4rem; line-height: 1.55; }
+  nav { display: flex; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: .6rem; margin-bottom: 1.2rem; }
+  nav a { text-decoration: none; color: var(--ink); }
+  nav a:hover { color: var(--accent); }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.05rem; margin-top: 1.6rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: .8rem; }
+  th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: .85rem; }
+  .num { text-align: right; }
+  .quote { border-left: 3px solid var(--line); margin: .6rem 0; padding: .3rem .9rem; color: #374151; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  .score { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .empty { color: var(--muted); padding: 2rem 0; }
+</style>
+</head>
+<body>
+<nav>
+  <strong>signal-engine</strong>
+  <a href="/digest">digest</a>
+  <a href="/pains">pains</a>
+  <a href="/status">status</a>
+</nav>
+{% block content %}{% endblock %}
+</body>
+</html>

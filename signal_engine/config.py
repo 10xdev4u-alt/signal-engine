@@ -73,13 +73,15 @@ def _parse_dotenv(path: Path) -> dict[str, str]:
 
 
 def load_settings(dotenv_path: str | Path = ".env", environ: dict | None = None) -> Settings:
+    """Precedence: defaults < .env file < process environment."""
+    source: dict[str, str] = dict(_parse_dotenv(Path(dotenv_path)))
     env = dict(os.environ if environ is None else environ)
-    env.update(_parse_dotenv(Path(dotenv_path)))
+    for alias, field_name in _ENV_ALIASES.items():
+        if alias in env:
+            source[field_name] = env[alias]
     kwargs: dict = {}
-    for field_name in {f.name for f in fields(Settings)} & set(_ENV_ALIASES.values()):
-        if field_name not in env:
-            continue
-        raw = env[field_name]
+    for field_name in {f.name for f in fields(Settings)} & set(source):
+        raw = source[field_name]
         if field_name in _INT_FIELDS:
             kwargs[field_name] = int(raw)
         elif field_name in _FLOAT_FIELDS:

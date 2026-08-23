@@ -145,6 +145,14 @@ def cmd_analyze(_args) -> int:
     return 0
 
 
+def cmd_serve(_args) -> int:
+    from signal_engine.web.app import run_server
+
+    settings, _ = _open_db()
+    run_server(port=settings.port)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="signal-engine", description=__doc__)
     parser.add_argument("--version", action="version", version=__version__)
@@ -168,7 +176,9 @@ def build_parser() -> argparse.ArgumentParser:
         func=cmd_analyze
     )
 
-    for future in ("digest", "serve", "report"):
+    sub.add_parser("serve", help="dashboard on loopback").set_defaults(func=cmd_serve)
+
+    for future in ("digest", "report"):
         sub.add_parser(future).set_defaults(func=cmd_not_implemented(future))
     return parser
 

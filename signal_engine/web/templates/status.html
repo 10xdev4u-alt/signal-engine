@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Status — Signal Engine{% endblock %}
+{% block content %}
+<h1>Collection status</h1>
+{% if subs %}
+<table>
+  <tr><th>subreddit</th><th class="num">posts</th><th class="num">comments</th></tr>
+  {% for s in subs %}
+  <tr><td><a href="/profile/{{ s.name }}">r/{{ s.name }}</a></td>
+      <td class="num">{{ s.posts }}</td><td class="num">{{ s.comments }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">No subreddits registered yet.</p>
+{% endif %}
+<h2>Recent fetch problems</h2>
+{% if recent_errors %}
+<table>
+  <tr><th>when</th><th>status</th><th>url</th></tr>
+  {% for e in recent_errors %}
+  <tr><td class="muted">{{ e.ts }}</td><td>{{ e.http_status }}</td><td class="muted">{{ e.url }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">Clean log — no failed fetches recorded.</p>
+{% endif %}
+{% endblock %}
