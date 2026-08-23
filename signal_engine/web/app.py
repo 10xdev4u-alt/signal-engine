@@ -2,13 +2,36 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+
+def sanitize_fts_query(raw: str) -> str:
+    """Build a safe FTS5 MATCH expression.
+
+    Bare terms get a trailing prefix star so `chargeback` matches
+    `chargebacks` (FTS5 does not stem). Explicitly quoted phrases keep
+    exact semantics — no star.
+    """
+    terms: list[str] = []
+    for match in re.finditer(r'"([^"]+)"|(\S+)', raw):
+        quoted_phrase = match.group(1)
+        phrase = (
+            quoted_phrase if quoted_phrase is not None else match.group(2)
+        ).replace('"', " ").strip()
+        if not phrase:
+            continue
+        if quoted_phrase is not None:
+            terms.append(f'"{phrase}"')
+        else:
+            terms.append(f'"{phrase}"*')
+    return " ".join(terms)
 
 
 def _db():
@@ -86,6 +109,61 @@ def create_app() -> FastAPI:
             request,
             "profile.html",
             {"subreddit": subreddit, "snapshots": [dict(s) for s in snapshots]},
+        )
+
+    @router.get("/search", response_class=HTMLResponse)
+    def search(
+        request: Request,
+        q: str = "",
+        sub: str = "",
+        type: str = "",  # noqa: A002 - matches the query-string name
+        from_: str = Query(default="", alias="from"),
+        to: str = "",
+    ):
+        conn = _db()
+        results: list[dict] = []
+        match_expr = sanitize_fts_query(q)
+        if match_expr:
+            to_inclusive = f"{to}~" if to else ""
+            type_filter = type if type in ("post", "comment") else ""
+            sql = (
+                "SELECT ref_type, ref_id, subreddit, permalink, created_utc, title,"
+                " snippet(search_index, 4, '<mark>', '</mark>', '…', 14) AS snip"
+                " FROM search_index WHERE search_index MATCH ?"
+                " AND (? = '' OR subreddit = ?)"
+                " AND (? = '' OR ref_type = ?)"
+                " AND (? = '' OR created_utc >= ?)"
+                " AND (? = '' OR created_utc <= ?)"
+                " ORDER BY created_utc DESC LIMIT 200"
+            )
+            date_from = from_
+            date_to_inclusive = to_inclusive
+            params = [match_expr]
+            params.append(sub)
+            params.append(sub)
+            params.append(type_filter)
+            params.append(type_filter)
+            params.append(date_from)
+            params.append(date_from)
+            params.append(to)
+            params.append(date_to_inclusive)
+            rows = conn.execute(sql, params)
+            results = [dict(r) for r in rows]
+        indexed = conn.execute(
+            "SELECT COUNT(*) AS c FROM search_index"
+        ).fetchone()["c"]
+        return templates.TemplateResponse(
+            request,
+            "search.html",
+            {
+                "q": q,
+                "sub": sub,
+                "type": type_filter if match_expr else type,
+                "from": from_,
+                "to": to,
+                "results": results,
+                "indexed": indexed,
+            },
         )
 
     @router.get("/status", response_class=HTMLResponse)

@@ -1,0 +1,7 @@
+'
+"
+OR
+*
+a OR b
+"unterminated
+NOT
