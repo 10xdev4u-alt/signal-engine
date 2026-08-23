@@ -47,11 +47,20 @@ r/smallbusiness and r/sidehustle restrict promotion similarly. In 2026
 Reddit rolled out LLM moderation ("Rules Hub") across hundreds of
 communities and publicly targeted AI marketing slop.
 
+The litigation ledger has two entries. Reddit v. Perplexity survived
+dismissal in July 2026. Reddit v. Anthropic was remanded to San Francisco
+Superior Court on March 30, 2026 (case CGC-25-625892); a demurrer hearing
+took place on August 12, 2026, and no ruling had been reported by our
+cutoff of 2026-08-23.
+
 Our conclusion: Signal Engine stays a personal research instrument. It reads
 public feeds from a home IP at a polite pace, a human reads the output, and
-distribution happens through channels you own. If this ever scales into
-commercial use, ingestion moves to the official Data API (about $0.24 per
-thousand calls).
+distribution happens through channels you own. This posture lowers risk but
+grants no exemption: RSS ingestion remains subject to Reddit's scraping
+restrictions, and the sanctioned path for anything bigger is the official
+Data API, which lists 10 queries per minute without OAuth, 100 queries per
+minute with OAuth, and about $0.24 per thousand calls for third-party apps
+that need more.
 
 ## 4. Assessment of the source guide
 
@@ -82,7 +91,9 @@ ready to sell.
 
 ## 6. Things we could not verify
 
-No official unauthenticated rate-limit number exists anywhere. The post-2023
-"100 queries per minute free tier" figure appears in secondary sources but
-not on any page we could fetch. We found no 2026 developments in the
-Anthropic lawsuit. Treat all three as unknowns.
+No official unauthenticated rate-limit number for RSS exists; Reddit's API
+facts page now publishes 10 QPM without OAuth, which supersedes the older
+unofficial figures. The post-2023 "100 queries per minute free tier" figure
+matches the OAuth tier on that page. We found no reported 2026 ruling in
+the Anthropic case, only the remand and the August hearing. Treat anything
+beyond these as unknown.

@@ -23,10 +23,10 @@ analyzer, the dashboard, the daily digest and search. See:
 - `docs/adr/`, architecture decision records
 - `AGENTS.md` and `CONTRIBUTING.md`, the development loop contract
 
-## Quickstart once M0 lands
+## Quickstart
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"       # add ,llm to enable Claude-assisted profiling
 signal-engine add-subreddit smallbusiness
 signal-engine fetch          # one polite pull
 signal-engine serve          # dashboard at http://localhost:7788
