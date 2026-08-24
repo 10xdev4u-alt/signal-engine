@@ -157,6 +157,27 @@ def create_app() -> FastAPI:
             if evaluated
             else 0.0
         )
+        if evaluated == 0:
+            recommendation = (
+                "no marks yet. Mark items below; the precision@10"
+                " figure will populate as you mark."
+            )
+        elif p10 < 0.7:
+            recommendation = (
+                f"precision@10 is {p10:.2f}, below the 0.70 target."
+                " Tighten the intent threshold or the cluster similarity cut."
+            )
+        else:
+            recommendation = (
+                f"precision@10 is {p10:.2f}. Above the 0.70 target."
+                " Hold the current thresholds."
+            )
+        week_digests = [
+            dict(r) for r in conn.execute(
+                "SELECT date, md FROM digests"
+                " WHERE date >= date('now', '-7 days') ORDER BY date DESC"
+            )
+        ]
         return templates.TemplateResponse(
             request,
             "eval.html",
@@ -165,6 +186,8 @@ def create_app() -> FastAPI:
                 "p10": p10,
                 "evaluated": evaluated,
                 "sample_size": len(flagged),
+                "recommendation": recommendation,
+                "week_digests": week_digests,
             },
         )
 

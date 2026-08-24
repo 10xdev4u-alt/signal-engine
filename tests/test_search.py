@@ -123,6 +123,27 @@ def test_eval_overview_renders_with_or_without_marks(client):
     assert page.status_code == 200
     assert "Precision@10" in page.text
     assert "/marks.json" in page.text
+    assert "no marks yet" in page.text
+
+
+def test_eval_recommendation_changes_with_marks(client):
+    http, conn = client
+    seed_search_corpus(conn)
+    flagged = list(conn.execute(
+        "SELECT s.ref_type, s.ref_id FROM intent_scores s"
+        " WHERE COALESCE(s.llm_score, s.heuristic_score) >= 4"
+    ))
+    if not flagged:
+        pytest.skip("seed corpus produced no intent-4+ items in the trailing 7 days")
+    for row in flagged:
+        http.post(
+            f"/eval/{row['ref_type']}/{row['ref_id']}",
+            data={"verdict": "real_problem"},
+            follow_redirects=False,
+        )
+    page = http.get("/eval")
+    assert page.status_code == 200
+    assert "Above the 0.70 target" in page.text or "precision@10 is 1.00" in page.text
 
 
 def test_eval_marks_export_is_json(client):

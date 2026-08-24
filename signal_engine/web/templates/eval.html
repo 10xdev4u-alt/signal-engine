@@ -1,47 +1,106 @@
-{% extends "base.html" %}
-{% block title %}Eval — Signal Engine{% endblock %}
+{% extends "_layout.html" %}
+{% block title %}Eval queue — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <span>Eval queue</span>{% endblock %}
 {% block content %}
-<h1>Eval harness</h1>
-<p>
-  Mark each flagged item as <em>real problem</em> or <em>noise</em>. The
-  precision@10 figure below is the share of marked items that were real
-  problems. Target: 0.70 or higher.
-</p>
-<p>
-  <span class="muted">Sample size: {{ sample_size }} · Marked: {{ evaluated }} ·
-  Precision@10: <strong>{{ "%.2f" | format(p10) }}</strong></span>
-  · <a href="/eval/marks.json">export JSON</a>
-</p>
-{% if flagged %}
-<table>
-  <tr><th>type</th><th>ref</th><th>score</th><th>when</th><th>verdict</th><th>mark</th></tr>
-  {% for f in flagged %}
-  <tr>
-    <td>{{ f.ref_type }}</td>
-    <td>{{ f.ref_id }}</td>
-    <td class="num score">{{ f.score }}</td>
-    <td class="muted">{{ f.scored_at[:10] }}</td>
-    <td>
-      {% if f.verdict == "real_problem" %}<span class="real">real</span>
-      {% elif f.verdict == "noise" %}<span class="noise">noise</span>
-      {% else %}<span class="muted">unmarked</span>{% endif %}
-    </td>
-    <td>
-      <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display:inline;">
-        <input type="hidden" name="verdict" value="real_problem">
-        <button type="submit">real</button>
-      </form>
-      <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display:inline;">
-        <input type="hidden" name="verdict" value="noise">
-        <button type="submit">noise</button>
-      </form>
-      <a href="{{ f.permalink }}" rel="noreferrer">↗</a>
-    </td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p class="empty">No high-intent items from the last 7 days yet. Run the digest a few times first.</p>
+{% set pct = (p10 or 0) * 100 %}
+{% set progress_class = "good" if pct >= 70 else ("bad" if pct < 50 else "") %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Eval queue</h1>
+    <p class="page-subtitle">Mark each flagged item as <em>real problem</em> or <em>noise</em>. The precision@10 figure below is the share of marked items that were real problems. Target: 0.70 or higher.</p>
+  </div>
+  <a class="nav-link" href="/eval/marks.json" style="background: var(--bg-3); color: var(--fg-2);">Export marks JSON ↗</a>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <span class="kpi-label">Sample</span>
+    <span class="kpi-value">{{ sample_size }}</span>
+    <span class="kpi-trend">high-intent items, last 7 days</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Marked</span>
+    <span class="kpi-value">{{ evaluated }}</span>
+    <span class="kpi-trend">of {{ sample_size }} ({{ ((evaluated / sample_size * 100) if sample_size else 0) | int }}% reviewed)</span>
+  </div>
+  <div class="kpi">
+    <span class="kpi-label">Precision@10</span>
+    <span class="kpi-value" style="color: {% if pct >= 70 %}var(--good){% elif pct < 50 %}var(--bad){% else %}var(--warn){% endif %};">{{ "%.2f" | format(p10 or 0) }}</span>
+    <span class="kpi-trend {% if pct >= 70 %}up{% elif pct < 50 %}down{% endif %}">
+      target: 0.70 · {{ recommendation }}
+    </span>
+  </div>
+</div>
+
+<div class="card">
+  <div style="margin-bottom: var(--space-4);">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-2);">
+      <span class="section-title" style="margin: 0;">Coverage of last 7 days</span>
+      <span class="muted" style="font-size: 0.85rem;">{{ evaluated }} / {{ sample_size }} reviewed</span>
+    </div>
+    <div class="progress {{ progress_class }}">
+      <span style="width: {{ ((evaluated / sample_size * 100) if sample_size else 0) | int }}%"></span>
+    </div>
+  </div>
+
+  {% if flagged %}
+  <div class="card-head" style="margin-top: var(--space-4);">
+    <h2 class="card-title">High-intent items</h2>
+    <p class="card-sub">Sorted newest first; one row per scored thread.</p>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+    {% for f in flagged %}
+    <div class="intent-card">
+      <div class="intent-score" data-score="{{ f.score }}">{{ f.score }}</div>
+      <div>
+        <div class="intent-text"><strong>{{ f.ref_id }}</strong> · <span class="muted">{{ f.scored_at[:10] }}</span></div>
+        <div class="muted" style="font-size: 0.8rem;">
+          {% if f.verdict == "real_problem" %}<span class="tag good">real</span>
+          {% elif f.verdict == "noise" %}<span class="tag bad">noise</span>
+          {% else %}<span class="tag">unmarked</span>{% endif %}
+        </div>
+      </div>
+      <div class="intent-actions">
+        <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display: inline-flex;">
+          <input type="hidden" name="verdict" value="real_problem">
+          <button class="success" type="submit">Real</button>
+        </form>
+        <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display: inline-flex;">
+          <input type="hidden" name="verdict" value="noise">
+          <button class="danger" type="submit">Noise</button>
+        </form>
+        {% if f.permalink %}<a class="nav-link" href="{{ f.permalink }}" rel="noreferrer" target="_blank" style="background: var(--bg-3); color: var(--fg-2); padding: 0.45rem 0.7rem;">↗</a>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <h3 style="margin: 0 0 var(--space-2); color: var(--fg-2);">No high-intent items yet</h3>
+    <p>Run the digest a few times. Items with intent score 4 or 5 from the trailing 7 days will appear here.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% if week_digests %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title">Recent digests (last 7 days)</h2>
+    <p class="card-sub">One line per generated morning brief.</p>
+  </div>
+  <div class="timeline">
+    {% for d in week_digests %}
+    <div class="timeline-item ok">
+      <div class="timeline-when">{{ d.date }}</div>
+      <div class="timeline-what">
+        {% set lines = d.md.splitlines() if d.md else [] %}
+        {% set snippet = "" %}
+        {% for line in lines[1:5] %}{% if line.strip() and not line.strip().startswith('## ') %}{% set _ = snippet %}{% endif %}{% endfor %}
+        {% if lines and lines[1] and not lines[1].startswith('## ') %}{{ lines[1][:120] }}{% else %}_digest generated_{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endif %}
-<p><a href="/digest">← back to digest</a></p>
 {% endblock %}
