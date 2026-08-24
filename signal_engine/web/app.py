@@ -111,6 +111,73 @@ def create_app() -> FastAPI:
             {"subreddit": subreddit, "snapshots": [dict(s) for s in snapshots]},
         )
 
+    @router.post("/eval/{ref_type}/{ref_id}", response_class=RedirectResponse)
+    def eval_mark(ref_type: str, ref_id: str, verdict: str = ""):
+        if verdict not in ("real_problem", "noise"):
+            raise HTTPException(status_code=400)
+        conn = _db()
+        mark_query = (
+            "INSERT INTO eval_marks(ref_type, ref_id, verdict) VALUES (?, ?, ?)"
+            " ON CONFLICT(ref_type, ref_id) DO UPDATE SET"
+            " verdict = excluded.verdict, marked_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')"
+        )
+        mark_params = (ref_type, ref_id, verdict)
+        conn.execute(mark_query, mark_params)
+        conn.commit()
+        return RedirectResponse("/", status_code=303)
+
+    @router.get("/eval", response_class=HTMLResponse)
+    def eval_overview(request: Request):
+        conn = _db()
+        recent_query = (
+            "SELECT s.ref_type, s.ref_id,"
+            " COALESCE(s.llm_score, s.heuristic_score) AS score,"
+            " COALESCE(p.permalink, c.permalink) AS permalink,"
+            " s.scored_at"
+            " FROM intent_scores s"
+            " LEFT JOIN posts p ON s.ref_type = 'post' AND p.id = s.ref_id"
+            " LEFT JOIN comments c ON s.ref_type = 'comment' AND c.id = s.ref_id"
+            " WHERE COALESCE(s.llm_score, s.heuristic_score) >= 4"
+            " AND COALESCE(p.permalink, c.permalink) IS NOT NULL"
+            " ORDER BY s.scored_at DESC LIMIT 10"
+        )
+        flagged = [dict(r) for r in conn.execute(recent_query)]
+        verdict_query = "SELECT verdict FROM eval_marks WHERE ref_type = ? AND ref_id = ?"
+        for f in flagged:
+            row = conn.execute(verdict_query, (f["ref_type"], f["ref_id"])).fetchone()
+            f["verdict"] = row["verdict"] if row else None
+        marked = [f for f in flagged if f["verdict"] is not None]
+        evaluated = len(marked)
+        p10 = (
+            sum(1 for f in marked if f["verdict"] == "real_problem") / evaluated
+            if evaluated
+            else 0.0
+        )
+        return templates.TemplateResponse(
+            request,
+            "eval.html",
+            {
+                "flagged": flagged,
+                "p10": p10,
+                "evaluated": evaluated,
+                "sample_size": len(flagged),
+            },
+        )
+
+    @router.get("/eval/marks.json")
+    def eval_export():
+        conn = _db()
+        export_query = (
+            "SELECT ref_type, ref_id, verdict, marked_at FROM eval_marks"
+            " ORDER BY marked_at DESC LIMIT 1000"
+        )
+        import json
+        rows = [dict(r) for r in conn.execute(export_query)]
+        return HTMLResponse(
+            f"<pre>{json.dumps(rows, indent=2)}</pre>",
+            headers={"Content-Disposition": "attachment; filename=eval_marks.json"},
+        )
+
     @router.get("/search", response_class=HTMLResponse)
     def search(
         request: Request,
