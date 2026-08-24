@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Signal Engine — Reddit audience research, read-only</title>
+  <meta name="description" content="A local-first system that listens to public Reddit feeds, ranks recurring pain points, and serves a daily digest. Reads only, never posts.">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a class="brand" href="/">signal-engine</a>
+      <nav>
+        <a href="#what">What it does</a>
+        <a href="#why">Why read-only</a>
+        <a href="#run">Run it</a>
+        <a href="https://github.com/10xdev4u-alt/signal-engine">Source</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Find desperate audiences before they find a scammer.</h1>
+        <p class="lead">
+          Signal Engine listens to public Reddit feeds, ranks the problems
+          that keep coming up, and writes a one-page morning brief with the
+          audience's own words. Local-first. Read-only. Built to be the
+          opposite of the AI marketing-slop pipeline.
+        </p>
+        <p class="cta">
+          <a class="btn primary" href="https://github.com/10xdev4u-alt/signal-engine#quickstart">Read the code</a>
+          <a class="btn" href="#why">Why it can't post</a>
+        </p>
+      </div>
+    </section>
+
+    <section id="what" class="container narrow">
+      <h2>What it actually does</h2>
+      <ol class="list">
+        <li><strong>Listens.</strong> Polls public subreddit RSS feeds on a 30-minute cron, paced politely, with a circuit breaker if Reddit starts blocking your IP.</li>
+        <li><strong>Indexes.</strong> Stores every post and comment in local SQLite with full-text search. No cloud, no API keys required to read.</li>
+        <li><strong>Mines.</strong> Clusters recurring pain points using deterministic stats (no LLM required). With an Anthropic key, enriches with quoted language and intent scoring, capped at a hard monthly budget.</li>
+        <li><strong>Reports.</strong> Generates a daily digest at 08:00 with the day's rising pains, new phrases that didn't exist two weeks ago, the queue of actively-asking threads, and engine health.</li>
+      </ol>
+    </section>
+
+    <section id="why" class="container narrow">
+      <h2>Why the agent never posts</h2>
+      <p>
+        Most "AI finds me customers on Reddit" tools work by mass-drafting
+        replies that read like help but funnel traffic. Reddit banned that
+        pattern in 2026 — and the operators that ran it lost their accounts.
+      </p>
+      <p>
+        Signal Engine has no login, no draft-for-paste queue, no
+        astroturfing path. The agent reads, mines, and writes to your
+        dashboard. Distribution happens through channels you own: your
+        site, your newsletter, your own transparent participation in
+        the communities you serve.
+      </p>
+      <p>
+        This is a feature, not a limitation. It's why the accounts that
+        do participate on Reddit survive.
+      </p>
+    </section>
+
+    <section id="run" class="container narrow">
+      <h2>Run it</h2>
+      <pre><code>pip install -e ".[dev]"
+signal-engine add-subreddit smallbusiness
+signal-engine fetch
+signal-engine serve         # dashboard at http://localhost:7788</code></pre>
+      <p>
+        Cron entries for unattended collection live in
+        <code>docs/crontab.txt</code>. Total monthly cost with the LLM
+        off: zero. With the LLM on: under $25.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>
+        Source on <a href="https://github.com/10xdev4u-alt/signal-engine">GitHub</a>.
+        MIT licensed. Built by an agentic pair:
+        <a href="https://github.com/10xdev4u-alt">10xdev4u-alt</a> and
+        <a href="https://github.com/the-ai-developer">the-ai-developer</a>.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
