@@ -1,22 +1,35 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Signal Engine — Reddit audience research, read-only</title>
   <meta name="description" content="A local-first system that listens to public Reddit feeds, ranks recurring pain points, and serves a daily digest. Reads only, never posts.">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23ff6b1a'/%3E%3Cpath d='M6 16l3-8 3 6 3-4 3 6' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./styles.css">
+  <script>
+    (function () {
+      var saved = localStorage.getItem("signal-engine-theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+    })();
+  </script>
 </head>
 <body>
-  <header>
+  <header class="public-header">
     <div class="container">
-      <a class="brand" href="/">signal-engine</a>
+      <a class="brand" href="/">
+        <span class="brand-mark">SE</span>
+        <span>signal-engine</span>
+      </a>
       <nav>
-        <a href="#what">What it does</a>
+        <a href="#how">How it works</a>
         <a href="#why">Why read-only</a>
         <a href="#run">Run it</a>
-        <a href="https://github.com/10xdev4u-alt/signal-engine">Source</a>
+        <a href="https://github.com/10xdev4u-alt/signal-engine" rel="noreferrer">Source</a>
+        <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme">
+          <span id="theme-icon">☾</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -24,36 +37,82 @@
   <main>
     <section class="hero">
       <div class="container">
-        <h1>Find desperate audiences before they find a scammer.</h1>
-        <p class="lead">
-          Signal Engine listens to public Reddit feeds, ranks the problems
-          that keep coming up, and writes a one-page morning brief with the
-          audience's own words. Local-first. Read-only. Built to be the
-          opposite of the AI marketing-slop pipeline.
+        <span class="hero-eyebrow">Local-first · MIT · Read-only</span>
+        <h1>Find desperate audiences <span class="accent">before they find a scammer.</span></h1>
+        <p class="hero-lead">
+          Signal Engine listens to public Reddit feeds, ranks the
+          problems that keep coming up, and writes a one-page morning
+          brief with the audience's own words. Local-first, read-only,
+          built to be the opposite of the AI marketing-slop pipeline.
         </p>
-        <p class="cta">
+        <div class="hero-cta">
           <a class="btn primary" href="https://github.com/10xdev4u-alt/signal-engine#quickstart">Read the code</a>
           <a class="btn" href="#why">Why it can't post</a>
-        </p>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-target="0">0</span>
+            <span class="hero-stat-label">Reddit accounts<br>needed</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">$0</span>
+            <span class="hero-stat-label">to run with<br>no LLM</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">&lt;$25</span>
+            <span class="hero-stat-label">monthly LLM<br>spend cap</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-value">0</span>
+            <span class="hero-stat-label">posts it<br>will ever write</span>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section id="what" class="container narrow">
-      <h2>What it actually does</h2>
-      <ol class="list">
-        <li><strong>Listens.</strong> Polls public subreddit RSS feeds on a 30-minute cron, paced politely, with a circuit breaker if Reddit starts blocking your IP.</li>
-        <li><strong>Indexes.</strong> Stores every post and comment in local SQLite with full-text search. No cloud, no API keys required to read.</li>
-        <li><strong>Mines.</strong> Clusters recurring pain points using deterministic stats (no LLM required). With an Anthropic key, enriches with quoted language and intent scoring, capped at a hard monthly budget.</li>
-        <li><strong>Reports.</strong> Generates a daily digest at 08:00 with the day's rising pains, new phrases that didn't exist two weeks ago, the queue of actively-asking threads, and engine health.</li>
+    <section id="how" class="container narrow">
+      <span class="section-label">How it works</span>
+      <h2>Four steps. One cron. One page in your browser by 8am.</h2>
+      <ol class="step-list">
+        <li>
+          <span class="step-num">01</span>
+          <div>
+            <h3>Listens</h3>
+            <p>Polls public subreddit RSS feeds on a 30-minute cron, paced politely at 45 seconds between requests, with a circuit breaker if Reddit starts blocking your IP.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">02</span>
+          <div>
+            <h3>Indexes</h3>
+            <p>Stores every post and comment in local SQLite with full-text search. No cloud, no API keys, no accounts to manage.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">03</span>
+          <div>
+            <h3>Mines</h3>
+            <p>Clusters recurring pain points with deterministic stats (no LLM required). With an Anthropic key, enriches with quoted language and intent scoring, capped at a hard monthly budget.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">04</span>
+          <div>
+            <h3>Reports</h3>
+            <p>Generates a daily digest at 08:00 with the day's rising pains, new phrases that didn't exist two weeks ago, the queue of actively-asking threads, and engine health.</p>
+          </div>
+        </li>
       </ol>
     </section>
 
     <section id="why" class="container narrow">
-      <h2>Why the agent never posts</h2>
+      <span class="section-label">Why read-only</span>
+      <h2>The agent never posts. That's the whole point.</h2>
       <p>
-        Most "AI finds me customers on Reddit" tools work by mass-drafting
-        replies that read like help but funnel traffic. Reddit banned that
-        pattern in 2026 — and the operators that ran it lost their accounts.
+        Most "AI finds me customers on Reddit" tools work by
+        mass-drafting replies that read like help but funnel traffic.
+        Reddit banned that pattern in 2026 — and the operators that
+        ran it lost their accounts.
       </p>
       <p>
         Signal Engine has no login, no draft-for-paste queue, no
@@ -62,35 +121,67 @@
         site, your newsletter, your own transparent participation in
         the communities you serve.
       </p>
-      <p>
-        This is a feature, not a limitation. It's why the accounts that
-        do participate on Reddit survive.
+      <p class="callout">
+        This is a feature, not a limitation. It's why the accounts
+        that <em>do</em> participate on Reddit survive.
       </p>
     </section>
 
     <section id="run" class="container narrow">
-      <h2>Run it</h2>
-      <pre><code>pip install -e ".[dev]"
+      <span class="section-label">Run it</span>
+      <h2>Five commands to a live engine.</h2>
+      <pre><code>git clone https://github.com/10xdev4u-alt/signal-engine
+cd signal-engine
+python -m venv .venv && . .venv/bin/activate
+pip install -e ".[dev]"
+
 signal-engine add-subreddit smallbusiness
-signal-engine fetch
-signal-engine serve         # dashboard at http://localhost:7788</code></pre>
+signal-engine fetch          # one polite pull
+signal-engine serve          # dashboard at http://localhost:7788</code></pre>
       <p>
         Cron entries for unattended collection live in
-        <code>docs/crontab.txt</code>. Total monthly cost with the LLM
-        off: zero. With the LLM on: under $25.
+        <code>docs/crontab.txt</code>. Monthly cost with the LLM off:
+        zero. With the LLM on: under $25. Hosted on your own
+        machine, your own data, your own call.
+      </p>
+    </section>
+
+    <section class="container narrow">
+      <h2>Built by an agentic pair.</h2>
+      <p>
+        One human, one AI. Every commit on this repo is reviewed by
+        the other, has a six-word conventional subject, ships behind
+        CI, and the security tooling is documented and enabled. Source
+        is public, MIT licensed, and the loop is fully open.
+      </p>
+      <p>
+        <a class="btn" href="https://github.com/10xdev4u-alt/signal-engine">Read the source on GitHub →</a>
       </p>
     </section>
   </main>
 
-  <footer>
+  <footer class="public-footer">
     <div class="container">
-      <p>
-        Source on <a href="https://github.com/10xdev4u-alt/signal-engine">GitHub</a>.
-        MIT licensed. Built by an agentic pair:
-        <a href="https://github.com/10xdev4u-alt">10xdev4u-alt</a> and
-        <a href="https://github.com/the-ai-developer">the-ai-developer</a>.
-      </p>
+      <p>MIT licensed. Built by <a href="https://github.com/10xdev4u-alt">10xdev4u-alt</a> and <a href="https://github.com/the-ai-developer">the-ai-developer</a>.</p>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById("theme-toggle");
+      var icon = document.getElementById("theme-icon");
+      function paint() {
+        icon.textContent = root.getAttribute("data-theme") === "light" ? "☀" : "☾";
+      }
+      paint();
+      btn.addEventListener("click", function () {
+        var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("signal-engine-theme", next);
+        paint();
+      });
+    })();
+  </script>
 </body>
 </html>
