@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Eval — Signal Engine{% endblock %}
+{% block content %}
+<h1>Eval harness</h1>
+<p>
+  Mark each flagged item as <em>real problem</em> or <em>noise</em>. The
+  precision@10 figure below is the share of marked items that were real
+  problems. Target: 0.70 or higher.
+</p>
+<p>
+  <span class="muted">Sample size: {{ sample_size }} · Marked: {{ evaluated }} ·
+  Precision@10: <strong>{{ "%.2f" | format(p10) }}</strong></span>
+  · <a href="/eval/marks.json">export JSON</a>
+</p>
+{% if flagged %}
+<table>
+  <tr><th>type</th><th>ref</th><th>score</th><th>when</th><th>verdict</th><th>mark</th></tr>
+  {% for f in flagged %}
+  <tr>
+    <td>{{ f.ref_type }}</td>
+    <td>{{ f.ref_id }}</td>
+    <td class="num score">{{ f.score }}</td>
+    <td class="muted">{{ f.scored_at[:10] }}</td>
+    <td>
+      {% if f.verdict == "real_problem" %}<span class="real">real</span>
+      {% elif f.verdict == "noise" %}<span class="noise">noise</span>
+      {% else %}<span class="muted">unmarked</span>{% endif %}
+    </td>
+    <td>
+      <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display:inline;">
+        <input type="hidden" name="verdict" value="real_problem">
+        <button type="submit">real</button>
+      </form>
+      <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display:inline;">
+        <input type="hidden" name="verdict" value="noise">
+        <button type="submit">noise</button>
+      </form>
+      <a href="{{ f.permalink }}" rel="noreferrer">↗</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">No high-intent items from the last 7 days yet. Run the digest a few times first.</p>
+{% endif %}
+<p><a href="/digest">← back to digest</a></p>
+{% endblock %}
