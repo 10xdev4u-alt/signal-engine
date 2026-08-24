@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
+from fastapi import APIRouter, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -112,7 +112,11 @@ def create_app() -> FastAPI:
         )
 
     @router.post("/eval/{ref_type}/{ref_id}", response_class=RedirectResponse)
-    def eval_mark(ref_type: str, ref_id: str, verdict: str = ""):
+    def eval_mark(
+        ref_type: str,
+        ref_id: str,
+        verdict: str = Form(...),
+    ):
         if verdict not in ("real_problem", "noise"):
             raise HTTPException(status_code=400)
         conn = _db()
@@ -124,7 +128,7 @@ def create_app() -> FastAPI:
         mark_params = (ref_type, ref_id, verdict)
         conn.execute(mark_query, mark_params)
         conn.commit()
-        return RedirectResponse("/", status_code=303)
+        return RedirectResponse("/eval", status_code=303)
 
     @router.get("/eval", response_class=HTMLResponse)
     def eval_overview(request: Request):

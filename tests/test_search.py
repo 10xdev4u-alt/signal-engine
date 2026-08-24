@@ -100,3 +100,42 @@ def test_search_count_display(client):
     page = http.get("/search", params={"q": "chargeback"})
     assert "8 result(s)" in page.text
     assert "items indexed" in page.text
+
+
+def test_eval_form_mark_writes_row_and_redirects(client):
+    http, conn = client
+    seed_search_corpus(conn)
+    response = http.post(
+        "/eval/post/t3_s1",
+        data={"verdict": "real_problem"},
+        follow_redirects=False,
+    )
+    assert response.status_code in (303, 302)
+    row = conn.execute(
+        "SELECT verdict FROM eval_marks WHERE ref_type = 'post' AND ref_id = 't3_s1'"
+    ).fetchone()
+    assert row is not None and row["verdict"] == "real_problem"
+
+
+def test_eval_overview_renders_with_or_without_marks(client):
+    http, _ = client
+    page = http.get("/eval")
+    assert page.status_code == 200
+    assert "Precision@10" in page.text
+    assert "/marks.json" in page.text
+
+
+def test_eval_marks_export_is_json(client):
+    http, _ = client
+    http.post(
+        "/eval/post/t3_s1",
+        data={"verdict": "real_problem"},
+        follow_redirects=False,
+    )
+    response = http.get("/eval/marks.json")
+    assert response.status_code == 200
+    import json as _json
+
+    body = response.text.split("<pre>", 1)[1].split("</pre>", 1)[0]
+    marks = _json.loads(body)
+    assert isinstance(marks, list) and marks and marks[0]["ref_id"] == "t3_s1"
