@@ -1,0 +1,11 @@
+# Code owners force a human review on every change.
+# Match paths on the right; owners on the left. Last match wins.
+
+# Default owner: the repo owner.
+*  @10xdev4u-alt @the-ai-developer
+
+# Security-sensitive paths want both eyes.
+SECURITY.md  @10xdev4u-alt
+.github/  @10xdev4u-alt
+docs/GUARDRAILS.md  @10xdev4u-alt
+docs/adr/  @10xdev4u-alt
