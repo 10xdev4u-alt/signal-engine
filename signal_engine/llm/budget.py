@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
+from datetime import UTC
 
 # Published list prices per million tokens as of 2026-08 (USD).
 # Kept here so the ledger works even when the user has zero LLM calls.
@@ -36,7 +37,9 @@ def estimate_cost(model: str, input_tokens: int, output_tokens: int) -> CallCost
         rates = _PRICES["claude-sonnet-5"]
     in_rate, out_rate = rates
     cost = (input_tokens / 1_000_000) * in_rate + (output_tokens / 1_000_000) * out_rate
-    return CallCost(model=model, input_tokens=input_tokens, output_tokens=output_tokens, cost_usd=cost)
+    return CallCost(
+        model=model, input_tokens=input_tokens, output_tokens=output_tokens, cost_usd=cost
+    )
 
 
 class BudgetExceeded(RuntimeError):
@@ -45,9 +48,9 @@ class BudgetExceeded(RuntimeError):
 
 def month_key() -> str:
     """Returns the current month key in YYYY-MM form."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    return datetime.now(tz=timezone.utc).strftime("%Y-%m")
+    return datetime.now(tz=UTC).strftime("%Y-%m")
 
 
 def spent_this_month(conn: sqlite3.Connection) -> float:

@@ -1,16 +1,17 @@
 """Budget ledger tests: estimates, monthly accumulation, hard cap behavior."""
 
+import json
+
 import pytest
 
+from signal_engine.db import connect, migrate
 from signal_engine.llm.budget import (
-    BudgetExceeded,
     CallCost,
     estimate_cost,
     month_key,
     record_spend,
     spent_this_month,
 )
-from signal_engine.db import connect, migrate
 
 
 @pytest.fixture()
@@ -48,10 +49,11 @@ def test_spent_starts_zero(db):
 
 
 def test_log_ring_buffer_caps_at_100(db):
-    for i in range(105):
+    for _ in range(105):
         record_spend(db, CallCost("claude-sonnet-5", 10, 10, 0.0001))
-    row = db.execute("SELECT value FROM settings WHERE key = ?", (f"llm_log:{month_key()}",)).fetchone()
-    import json
+    row = db.execute(
+        "SELECT value FROM settings WHERE key = ?", (f"llm_log:{month_key()}",)
+    ).fetchone()
     entries = json.loads(row["value"])
     assert len(entries) == 100
-    assert entries[-1]["in"] == 10  # most recent survived
+    assert entries[-1]["in"] == 10

@@ -35,9 +35,13 @@ class AnthropicProvider:
                     messages=[{"role": "user", "content": user}],
                     max_tokens=max_tokens,
                 )
-                parts = [block.text for block in response.content if getattr(block, "type", "") == "text"]
+                parts = [
+                    block.text
+                    for block in response.content
+                    if getattr(block, "type", "") == "text"
+                ]
                 return "".join(parts).strip() or "_(empty response)_"
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc
                 time.sleep(2 ** attempt)
-        return f"_(LLM error after 3 attempts: {last_exc})_"
+        return f"_(LLM error after 3 attempts: {last_exc})_"  # noqa: E501
