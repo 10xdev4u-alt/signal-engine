@@ -31,10 +31,10 @@ def client(tmp_path, monkeypatch):
 def populated_client(client):
     """Client with seeded posts and rebuilt clusters."""
     http, conn = client
-    upsert_post(conn, _post("s1", "smallbusiness", "Chargebacks destroying margin", "tried dispute template"))
-    upsert_post(conn, _post("s2", "smallbusiness", "Sourdough starter question", "smells like acetone"))
+    upsert_post(conn, _post("s1", "smallbusiness", "Chargebacks destroying margin", "dispute fee"))
+    upsert_post(conn, _post("s2", "smallbusiness", "Sourdough starter", "smells acetone"))
     for i in range(7):
-        upsert_post(conn, _post(f"s3{i}", "smallbusiness", f"chargebacks case {i}", "body"))
+        upsert_post(conn, _post(f"s3{i}", "smallbusiness", f"chargeback case {i}", "body"))
     from signal_engine.analyze.cluster import rebuild_clusters
     rebuild_clusters(conn)
     from signal_engine.analyze.questions import record_intent

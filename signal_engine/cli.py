@@ -186,11 +186,11 @@ def cmd_serve(_args) -> int:
 
 
 def cmd_api(_args) -> int:
-    """Run the pure JSON API server (no frontend)."""
+    """Run the pure JSON API server."""
     import uvicorn
+    from fastapi import FastAPI
 
     from signal_engine.api.routes import create_api_router
-    from fastapi import FastAPI
 
     app = FastAPI(title="Signal Engine API", docs_url="/docs")
     app.include_router(create_api_router())
