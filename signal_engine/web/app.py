@@ -138,6 +138,7 @@ def create_app() -> FastAPI:
         recent_query = (
             "SELECT s.ref_type, s.ref_id,"
             " COALESCE(s.llm_score, s.heuristic_score) AS score,"
+            " COALESCE(NULLIF(p.title, ''), substr(c.body, 1, 140)) AS snippet,"
             " COALESCE(p.permalink, c.permalink) AS permalink,"
             " s.scored_at"
             " FROM intent_scores s"
