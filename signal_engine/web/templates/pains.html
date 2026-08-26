@@ -1,20 +1,35 @@
-{% extends "base.html" %}
-{% block title %}Pains — Signal Engine{% endblock %}
+{% extends "_layout.html" %}
+{% block title %}Pain clusters — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <span>Pain clusters</span>{% endblock %}
 {% block content %}
-<h1>Pain clusters</h1>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Pain clusters</h1>
+    <p class="page-subtitle">Recurring problems grouped by shared language, ranked by desperation × mention count.</p>
+  </div>
+</div>
 {% if clusters %}
-<table>
-  <tr><th>cluster</th><th class="num">mentions</th><th class="num">desperation</th><th class="num">seen</th></tr>
-  {% for c in clusters %}
-  <tr>
-    <td><a href="/pains/{{ c.id }}">{{ c.label }}</a></td>
-    <td class="num">{{ c.mention_count }}</td>
-    <td class="num score">{{ "%.1f" | format(c.desperation_score) }}</td>
-    <td class="num muted">{{ c.first_seen or "?" }} → {{ c.last_seen or "?" }}</td>
-  </tr>
-  {% endfor %}
-</table>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>Cluster</th><th class="num">Mentions</th><th class="num">Desperation</th><th>Seen</th></tr>
+    </thead>
+    <tbody>
+      {% for c in clusters %}
+      <tr>
+        <td><a href="/pains/{{ c.id }}">{{ c.label }}</a></td>
+        <td class="num">{{ c.mention_count }}</td>
+        <td class="num score">{{ "%.1f" | format(c.desperation_score) }}</td>
+        <td class="num muted">{{ c.first_seen or "?" }} → {{ c.last_seen or "?" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p class="empty">Nothing collected yet — run <code>./run.sh fetch</code> then <code>./run.sh analyze</code>.</p>
+<div class="card empty">
+  <h3 style="margin: 0 0 var(--space-2);">Nothing collected yet</h3>
+  <p style="margin: 0;">Run <code>./run.sh fetch</code> then <code>./run.sh analyze</code> to cluster pain points.</p>
+</div>
 {% endif %}
 {% endblock %}

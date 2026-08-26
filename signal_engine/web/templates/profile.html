@@ -1,12 +1,25 @@
-{% extends "base.html" %}
+{% extends "_layout.html" %}
 {% block title %}r/{{ subreddit }} profile — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <a href="/status">Status</a> <span class="crumbs-sep">/</span> <span>r/{{ subreddit }}</span>{% endblock %}
 {% block content %}
-<h1>r/{{ subreddit }} profile</h1>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">r/{{ subreddit }}</h1>
+    <p class="page-subtitle">A living community profile: distinctive phrases, active hours, and the language people use when they are stuck.</p>
+  </div>
+</div>
 {% if snapshots %}
-<p class="muted">generated {{ snapshots[0].generated_at }}</p>
-<pre style="white-space: pre-wrap; font-family: inherit;">{{ snapshots[0].snapshot_md }}</pre>
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title">Latest snapshot</h2>
+    <p class="card-sub">Generated {{ snapshots[0].generated_at }}</p>
+  </div>
+  <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ snapshots[0].snapshot_md }}</pre>
+</div>
 {% else %}
-<p class="empty">No profile yet — the nightly builder lands in M2 (issue #10).</p>
+<div class="card empty">
+  <h3 style="margin: 0 0 var(--space-2);">No profile yet</h3>
+  <p style="margin: 0;">Profiles build on the nightly cron. Run <code>./run.sh analyze</code> first, then the builder renders a snapshot.</p>
+</div>
 {% endif %}
-<p><a href="/status">← status</a></p>
 {% endblock %}

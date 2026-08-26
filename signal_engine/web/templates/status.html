@@ -1,27 +1,57 @@
-{% extends "base.html" %}
+{% extends "_layout.html" %}
 {% block title %}Status — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <span>Status</span>{% endblock %}
 {% block content %}
-<h1>Collection status</h1>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Collection status</h1>
+    <p class="page-subtitle">Per-subreddit health and recent fetch problems.</p>
+  </div>
+</div>
 {% if subs %}
-<table>
-  <tr><th>subreddit</th><th class="num">posts</th><th class="num">comments</th></tr>
-  {% for s in subs %}
-  <tr><td><a href="/profile/{{ s.name }}">r/{{ s.name }}</a></td>
-      <td class="num">{{ s.posts }}</td><td class="num">{{ s.comments }}</td></tr>
-  {% endfor %}
-</table>
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title">Subreddits</h2>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Subreddit</th><th class="num">Posts</th><th class="num">Comments</th></tr>
+    </thead>
+    <tbody>
+      {% for s in subs %}
+      <tr>
+        <td><a href="/profile/{{ s.name }}">r/{{ s.name }}</a></td>
+        <td class="num">{{ s.posts }}</td>
+        <td class="num">{{ s.comments }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p class="empty">No subreddits registered yet.</p>
+<div class="card empty">
+  <h3 style="margin: 0 0 var(--space-2);">No subreddits registered yet</h3>
+  <p style="margin: 0;">Run <code>./run.sh add-subreddit &lt;name&gt;</code> to start.</p>
+</div>
 {% endif %}
-<h2>Recent fetch problems</h2>
-{% if recent_errors %}
-<table>
-  <tr><th>when</th><th>status</th><th>url</th></tr>
-  {% for e in recent_errors %}
-  <tr><td class="muted">{{ e.ts }}</td><td>{{ e.http_status }}</td><td class="muted">{{ e.url }}</td></tr>
-  {% endfor %}
-</table>
-{% else %}
-<p class="empty">Clean log — no failed fetches recorded.</p>
-{% endif %}
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title">Recent fetch problems</h2>
+    <p class="card-sub">Failed or blocked requests from the trailing log.</p>
+  </div>
+  {% if recent_errors %}
+  <table>
+    <thead>
+      <tr><th>When</th><th>Status</th><th>URL</th></tr>
+    </thead>
+    <tbody>
+      {% for e in recent_errors %}
+      <tr><td class="muted">{{ e.ts }}</td><td>{{ e.http_status }}</td><td class="muted">{{ e.url }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty" style="padding: var(--space-4) 0;">Clean log — no failed fetches recorded.</p>
+  {% endif %}
+</div>
 {% endblock %}
