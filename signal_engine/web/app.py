@@ -104,9 +104,8 @@ def create_app() -> FastAPI:
         conn = _db()
         if build:
             from signal_engine.analyze.profile import build_profile
-            from signal_engine.llm.base import make_provider
-
             from signal_engine.config import load_settings
+            from signal_engine.llm.base import make_provider
 
             provider = make_provider(load_settings())
             build_profile(
