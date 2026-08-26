@@ -13,7 +13,9 @@
   --accent: #ff6b1a;
   --accent-fg: #fff;
   --good: #2ecc71;
+  --good-fg: #101214;
   --bad: #ff5d5d;
+  --bad-fg: #101214;
   --warn: #f1c40f;
   --ink: var(--fg-1);
   --muted: var(--fg-2);
@@ -37,7 +39,9 @@
   --accent: #b45309;
   --accent-fg: #fff;
   --good: #1f9d57;
+  --good-fg: #101214;
   --bad: #d63333;
+  --bad-fg: #fff;
   --warn: #b8860b;
   --ink: var(--fg-1);
   --muted: var(--fg-2);
@@ -279,8 +283,8 @@ button, .success, .danger {
   cursor: pointer;
 }
 button:hover { border-color: var(--accent); }
-.success { background: var(--good); color: #fff; border-color: transparent; }
-.danger { background: var(--bad); color: #fff; border-color: transparent; }
+.success { background: var(--good); color: var(--good-fg); border-color: transparent; }
+.danger { background: var(--bad); color: var(--bad-fg); border-color: transparent; }
 
 /* Tables */
 table { border-collapse: collapse; width: 100%; margin-top: var(--space-3); }
