@@ -53,7 +53,7 @@
     <div class="intent-card">
       <div class="intent-score" data-score="{{ f.score }}">{{ f.score }}</div>
       <div>
-        <div class="intent-text"><strong>{{ f.ref_id }}</strong> · <span class="muted">{{ f.scored_at[:10] }}</span></div>
+        <div class="intent-text">{{ f.snippet or f.ref_id }} <span class="muted">· {{ f.scored_at[:10] }}</span></div>
         <div class="muted" style="font-size: 0.8rem;">
           {% if f.verdict == "real_problem" %}<span class="tag good">real</span>
           {% elif f.verdict == "noise" %}<span class="tag bad">noise</span>
