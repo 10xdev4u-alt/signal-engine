@@ -9,7 +9,7 @@
     <h1 class="page-title">Eval queue</h1>
     <p class="page-subtitle">Mark each flagged item as <em>real problem</em> or <em>noise</em>. The precision@10 figure below is the share of marked items that were real problems. Target: 0.70 or higher.</p>
   </div>
-  <a class="btn" href="/eval/marks.json">Export marks JSON ↗</a>
+  <a class="btn" href="/eval/marks.json"><i data-lucide="download" style="width:16px;height:16px"></i> Export marks JSON</a>
 </div>
 
 <div class="kpi-row">
@@ -55,27 +55,27 @@
       <div style="min-width: 0; flex: 1;">
         <div class="intent-text">{{ f.snippet or f.ref_id }} <span class="muted">· {{ f.scored_at[:10] }}</span></div>
         <div class="muted" style="font-size: var(--text-sm); margin-top: var(--sp-1);">
-          {% if f.verdict == "real_problem" %}<span class="tag good">real</span>
-          {% elif f.verdict == "noise" %}<span class="tag bad">noise</span>
-          {% else %}<span class="tag">unmarked</span>{% endif %}
+          {% if f.verdict == "real_problem" %}<span class="tag good"><i data-lucide="check" style="width:10px;height:10px"></i> real</span>
+          {% elif f.verdict == "noise" %}<span class="tag bad"><i data-lucide="x" style="width:10px;height:10px"></i> noise</span>
+          {% else %}<span class="tag"><i data-lucide="minus" style="width:10px;height:10px"></i> unmarked</span>{% endif %}
         </div>
       </div>
       <div class="intent-actions">
         <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display: inline-flex;">
           <input type="hidden" name="verdict" value="real_problem">
-          <button class="success" type="submit">Real</button>
+          <button class="success" type="submit"><i data-lucide="check" style="width:14px;height:14px"></i> Real</button>
         </form>
         <form method="post" action="/eval/{{ f.ref_type }}/{{ f.ref_id }}" style="display: inline-flex;">
           <input type="hidden" name="verdict" value="noise">
-          <button class="danger" type="submit">Noise</button>
+          <button class="danger" type="submit"><i data-lucide="x" style="width:14px;height:14px"></i> Noise</button>
         </form>
-        {% if f.permalink %}<a class="btn" href="{{ f.permalink }}" rel="noreferrer" target="_blank">↗</a>{% endif %}
+        {% if f.permalink %}<a class="btn" href="{{ f.permalink }}" rel="noreferrer" target="_blank"><i data-lucide="external-link" style="width:14px;height:14px"></i></a>{% endif %}
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty">
+  <div class="card empty">
     <h3>No high-intent items yet</h3>
     <p>Run the digest a few times. Items with intent score 4 or 5 from the trailing 7 days will appear here.</p>
   </div>
