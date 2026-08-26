@@ -1,10 +1,21 @@
-{% extends "base.html" %}
+{% extends "_layout.html" %}
 {% block title %}Digest — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <span>Digest</span>{% endblock %}
 {% block content %}
-<h1>Daily digest {% if date %}<span class="muted">{{ date }}</span>{% endif %}</h1>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Daily digest</h1>
+    <p class="page-subtitle">What hurt today, which phrases are new, and who is actively asking. {% if date %}— <span class="score">{{ date }}</span>{% endif %}</p>
+  </div>
+</div>
 {% if markdown %}
-<pre style="white-space: pre-wrap; font-family: inherit;">{{ markdown }}</pre>
+<div class="card">
+  <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ markdown }}</pre>
+</div>
 {% else %}
-<p class="empty">No digest yet. The generator lands with issue #8; until then, browse <a href="/pains">pains</a> directly.</p>
+<div class="card empty">
+  <h3 style="margin: 0 0 var(--space-2);">No digest yet</h3>
+  <p style="margin: 0;">Run <code>./run.sh fetch analyze digest</code> to generate the morning brief.</p>
+</div>
 {% endif %}
 {% endblock %}

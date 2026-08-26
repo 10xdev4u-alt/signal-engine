@@ -1,17 +1,33 @@
-{% extends "base.html" %}
+{% extends "_layout.html" %}
 {% block title %}{{ cluster.label }} — Signal Engine{% endblock %}
+{% block crumbs %}<a href="/digest">signal-engine</a> <span class="crumbs-sep">/</span> <a href="/pains">Pain clusters</a> <span class="crumbs-sep">/</span> <span>{{ cluster.label }}</span>{% endblock %}
 {% block content %}
-<h1>{{ cluster.label }}</h1>
-<p><span class="score">{{ cluster.mention_count }} mentions</span> ·
-   desperation {{ "%.1f" | format(cluster.desperation_score) }} ·
-   <a href="/pains">← all pains</a></p>
-<h2>Evidence</h2>
-{% for m in members %}
-<blockquote class="quote">
-  {{ m.quote }}
-  {% if m.permalink %}<div class="muted"><a href="{{ m.permalink }}" rel="noreferrer">{{ m.ref_type }} ↗</a></div>{% endif %}
-</blockquote>
-{% else %}
-<p class="empty">No stored quotes for this cluster.</p>
-{% endfor %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ cluster.label }}</h1>
+    <p class="page-subtitle">
+      <span class="score">{{ cluster.mention_count }} mentions</span> ·
+      desperation {{ "%.1f" | format(cluster.desperation_score) }}
+    </p>
+  </div>
+  <a class="nav-link" href="/pains" style="background: var(--bg-3); color: var(--fg-2);">← all pains</a>
+</div>
+<div class="card">
+  <div class="card-head">
+    <h2 class="card-title">Evidence</h2>
+    <p class="card-sub">Each quote is a real post or comment that landed in this cluster.</p>
+  </div>
+  {% if members %}
+  <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+    {% for m in members %}
+    <blockquote class="quote">
+      {{ m.quote }}
+      {% if m.permalink %}<div class="muted" style="margin-top: var(--space-2);"><a href="{{ m.permalink }}" rel="noreferrer" target="_blank">{{ m.ref_type }} ↗</a></div>{% endif %}
+    </blockquote>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No stored quotes for this cluster.</p>
+  {% endif %}
+</div>
 {% endblock %}
