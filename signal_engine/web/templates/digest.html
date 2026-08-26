@@ -8,9 +8,9 @@
     <p class="page-subtitle">What hurt today, which phrases are new, and who is actively asking. {% if date %}— <span class="score">{{ date }}</span>{% endif %}</p>
   </div>
 </div>
-{% if markdown %}
-<div class="card">
-  <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ markdown }}</pre>
+{% if html %}
+<div class="card digest-md">
+  {{ html | safe }}
 </div>
 {% else %}
 <div class="card empty">
