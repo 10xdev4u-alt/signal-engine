@@ -53,14 +53,21 @@ def create_app() -> FastAPI:
 
     @router.get("/digest", response_class=HTMLResponse)
     def digest(request: Request):
+        from signal_engine.web.mdrender import render_digest
+
         conn = _db()
         row = conn.execute(
             "SELECT date, md FROM digests ORDER BY date DESC LIMIT 1"
         ).fetchone()
+        md = row["md"] if row else None
         return templates.TemplateResponse(
             request,
             "digest.html",
-            {"date": row["date"] if row else None, "markdown": row["md"] if row else None},
+            {
+                "date": row["date"] if row else None,
+                "markdown": md,
+                "html": render_digest(md) if md else None,
+            },
         )
 
     @router.get("/pains", response_class=HTMLResponse)
