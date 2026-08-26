@@ -16,10 +16,14 @@
   </div>
   <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">{{ snapshots[0].snapshot_md }}</pre>
 </div>
+<div class="card" style="margin-top: var(--space-4);">
+  <a class="nav-link" href="/profile/{{ subreddit }}?build=true" style="background: var(--bg-3); color: var(--fg-2); display: inline-block;">↻ Rebuild profile</a>
+</div>
 {% else %}
 <div class="card empty">
   <h3 style="margin: 0 0 var(--space-2);">No profile yet</h3>
-  <p style="margin: 0;">Profiles build on the nightly cron. Run <code>./run.sh analyze</code> first, then the builder renders a snapshot.</p>
+  <p style="margin: 0 0 var(--space-3);">Profiles build from collected posts. Run <code>./run.sh analyze</code> first, then build.</p>
+  <a class="success" href="/profile/{{ subreddit }}?build=true" style="text-decoration: none; display: inline-block;">Build profile</a>
 </div>
 {% endif %}
 {% endblock %}

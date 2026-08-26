@@ -158,6 +158,25 @@ def cmd_analyze(_args) -> int:
     return 0
 
 
+def cmd_profile(args) -> int:
+    from rich.console import Console
+
+    from signal_engine.analyze.profile import build_all_active
+    from signal_engine.llm.base import make_provider
+
+    settings, conn = _open_db()
+    provider = make_provider(settings)
+    results = build_all_active(conn, provider=provider, monthly_cap=settings.monthly_llm_budget)
+    console = Console()
+    if not results:
+        console.print("[dim]no active subreddits — use add-subreddit first[/dim]")
+        return 0
+    for r in results:
+        llm = f", {r.llm_calls} LLM sections" if r.llm_calls else ""
+        console.print(f"[green]r/{r.subreddit}:[/green] {r.diff_summary}{llm}")
+    return 0
+
+
 def cmd_serve(_args) -> int:
     from signal_engine.web.app import run_server
 
@@ -187,6 +206,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("analyze", help="extract signals from collected data").set_defaults(
         func=cmd_analyze
+    )
+
+    sub.add_parser("profile", help="build community profiles for active subreddits").set_defaults(
+        func=cmd_profile
     )
 
     sub.add_parser("serve", help="dashboard on loopback").set_defaults(func=cmd_serve)
