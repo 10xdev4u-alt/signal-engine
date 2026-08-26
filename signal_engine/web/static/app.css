@@ -50,9 +50,9 @@
   --fg-quaternary: #3d4559;
 
   /* ── THREE VOICES TYPOGRAPHY ── */
-  --font-poet: "Instrument Serif", "Clash Display", Georgia, serif;
-  --font-citizen: "Instrument Sans", "Geist", "Inter", system-ui, sans-serif;
-  --font-machine: "Geist Mono", "JetBrains Mono", "SF Mono", monospace;
+  --font-poet: "Instrument Serif", Georgia, serif;
+  --font-citizen: "Instrument Sans", "Inter", system-ui, sans-serif;
+  --font-machine: "JetBrains Mono", "SF Mono", monospace;
   --text-xs: clamp(0.65rem, 0.7vw, 0.75rem);
   --text-sm: clamp(0.75rem, 0.85vw, 0.875rem);
   --text-base: clamp(0.85rem, 1vw, 1rem);

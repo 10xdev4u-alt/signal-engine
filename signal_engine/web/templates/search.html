@@ -10,15 +10,15 @@
 </div>
 <div class="card">
   <form method="get" action="/search" style="display:flex; gap:.5rem; flex-wrap:wrap; margin: 0;">
-    <input type="text" name="q" value="{{ q }}" placeholder='e.g. chargebacks or "dispute template"' style="flex:1; min-width:14rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
-    <input type="text" name="sub" value="{{ sub }}" placeholder="subreddit" style="width:9rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
-    <select name="type" style="padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="text" name="q" value="{{ q }}" placeholder='e.g. chargebacks or "dispute template"' style="flex:1; min-width:14rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--rim); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="text" name="sub" value="{{ sub }}" placeholder="subreddit" style="width:9rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--rim); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <select name="type" style="padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--rim); border-radius:var(--radius-sm); color:var(--fg-1);">
       <option value="">all</option>
       <option value="post" {% if type == 'post' %}selected{% endif %}>posts</option>
       <option value="comment" {% if type == 'comment' %}selected{% endif %}>comments</option>
     </select>
-    <input type="date" name="from" value="{{ from }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
-    <input type="date" name="to" value="{{ to }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="date" name="from" value="{{ from }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--rim); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="date" name="to" value="{{ to }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--rim); border-radius:var(--radius-sm); color:var(--fg-1);">
     <button type="submit" style="padding:.5rem 1.2rem;">Search</button>
   </form>
 </div>

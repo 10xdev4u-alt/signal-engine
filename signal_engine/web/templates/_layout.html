@@ -4,9 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Signal Engine{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"></noscript>
   <link rel="stylesheet" href="/static/app.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%238B5CF6'/%3E%3Cpath d='M6 16l3-8 3 6 3-4 3 6' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <meta name="color-scheme" content="dark light">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script>
     (function () {
       var saved = localStorage.getItem("signal-engine-theme");
@@ -14,11 +22,11 @@
     })();
   </script>
 </head>
-<body>
+<body x-data="{ sidebarOpen: false }">
   <div class="cursor-spotlight" id="cursor-spotlight"></div>
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay" :class="{ 'open': sidebarOpen }" @click="sidebarOpen = false"></div>
   <div class="shell">
-    <aside class="shell-sidebar" id="sidebar" aria-label="Primary">
+    <aside class="shell-sidebar" id="sidebar" :class="{ 'open': sidebarOpen }" aria-label="Primary">
       <a class="brand" href="/digest">
         <span class="brand-mark">SE</span>
         <span>
@@ -28,26 +36,38 @@
       </a>
       <nav class="nav-section" aria-label="Pages">
         <div class="nav-section-title">Today</div>
-        <a class="nav-link" href="/digest" {% if request.url.path == '/digest' or request.url.path == '/' %}aria-current="page"{% endif %}>Digest</a>
-        <a class="nav-link" href="/pains" {% if request.url.path.startswith('/pains') %}aria-current="page"{% endif %}>Pain clusters</a>
-        <a class="nav-link" href="/eval" {% if request.url.path.startswith('/eval') %}aria-current="page"{% endif %}>Eval queue</a>
+        <a class="nav-link" href="/digest" {% if request.url.path == '/digest' or request.url.path == '/' %}aria-current="page"{% endif %}>
+          <i data-lucide="newspaper" style="width:18px;height:18px"></i> Digest
+        </a>
+        <a class="nav-link" href="/pains" {% if request.url.path.startswith('/pains') %}aria-current="page"{% endif %}>
+          <i data-lucide="flame" style="width:18px;height:18px"></i> Pain clusters
+        </a>
+        <a class="nav-link" href="/eval" {% if request.url.path.startswith('/eval') %}aria-current="page"{% endif %}>
+          <i data-lucide="check-circle" style="width:18px;height:18px"></i> Eval queue
+        </a>
         <div class="nav-section-title">Explore</div>
-        <a class="nav-link" href="/search" {% if request.url.path.startswith('/search') %}aria-current="page"{% endif %}>Search</a>
-        <a class="nav-link" href="/status" {% if request.url.path == '/status' %}aria-current="page"{% endif %}>Status</a>
+        <a class="nav-link" href="/search" {% if request.url.path.startswith('/search') %}aria-current="page"{% endif %}>
+          <i data-lucide="search" style="width:18px;height:18px"></i> Search
+        </a>
+        <a class="nav-link" href="/status" {% if request.url.path == '/status' %}aria-current="page"{% endif %}>
+          <i data-lucide="activity" style="width:18px;height:18px"></i> Status
+        </a>
       </nav>
       <div style="margin-top:auto; display:flex; flex-direction:column; gap:var(--sp-2);">
         <a class="nav-link" href="https://github.com/10xdev4u-alt/signal-engine" rel="noreferrer" target="_blank">
-          <span>↗</span> Source
+          <i data-lucide="external-link" style="width:18px;height:18px"></i> Source
         </a>
         <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-          <span id="theme-icon">☾</span>
+          <i data-lucide="moon" id="theme-icon" style="width:18px;height:18px"></i>
         </button>
       </div>
     </aside>
     <div class="shell-main">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar" type="button">☰</button>
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" :aria-expanded="sidebarOpen" aria-controls="sidebar" type="button" @click="sidebarOpen = !sidebarOpen">
+            <i data-lucide="menu" style="width:20px;height:20px"></i>
+          </button>
           <nav class="crumbs" aria-label="Breadcrumb">
             {% block crumbs %}
               <a href="/digest">signal-engine</a>
@@ -56,10 +76,13 @@
         </div>
         <div style="display:flex; align-items:center; gap:var(--sp-3);">
           <a class="search-pill" href="/search">
+            <i data-lucide="search" style="width:16px;height:16px"></i>
             <span>Search collected data…</span>
             <kbd>Ctrl K</kbd>
           </a>
-          <a class="upgrade-pill" href="#">★ Upgrade</a>
+          <a class="upgrade-pill" href="#">
+            <i data-lucide="sparkles" style="width:16px;height:16px"></i> Upgrade
+          </a>
         </div>
       </header>
       <main class="content">
@@ -72,12 +95,13 @@
       var root = document.documentElement;
       var btn = document.getElementById("theme-toggle");
       var icon = document.getElementById("theme-icon");
-      if (!btn) return;
       function paint() {
-        icon.textContent = root.getAttribute("data-theme") === "light" ? "☀" : "☾";
+        var isLight = root.getAttribute("data-theme") === "light";
+        icon.setAttribute("data-lucide", isLight ? "sun" : "moon");
+        if (window.lucide) lucide.createIcons({ nodes: [icon] });
       }
       paint();
-      btn.addEventListener("click", function () {
+      if (btn) btn.addEventListener("click", function () {
         var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
         root.setAttribute("data-theme", next);
         localStorage.setItem("signal-engine-theme", next);
@@ -89,17 +113,11 @@
           window.location.href = "/search";
         }
       });
-      var toggle = document.getElementById("menu-toggle");
-      var sidebar = document.getElementById("sidebar");
-      var overlay = document.getElementById("sidebar-overlay");
-      function openMenu() { sidebar.classList.add("open"); overlay.classList.add("open"); if (toggle) toggle.setAttribute("aria-expanded", "true"); }
-      function closeMenu() { sidebar.classList.remove("open"); overlay.classList.remove("open"); if (toggle) toggle.setAttribute("aria-expanded", "false"); }
-      if (toggle) toggle.addEventListener("click", function () {
-        sidebar.classList.contains("open") ? closeMenu() : openMenu();
-      });
-      if (overlay) overlay.addEventListener("click", closeMenu);
       window.addEventListener("resize", function () {
-        if (window.innerWidth > 880) closeMenu();
+        if (window.innerWidth > 880) {
+          var shell = document.querySelector('.shell');
+          if (shell && shell.__x) shell.__x.$data.sidebarOpen = false;
+        }
       });
       var spotlight = document.getElementById("cursor-spotlight");
       if (spotlight) {
@@ -108,6 +126,7 @@
           spotlight.style.top = e.clientY + "px";
         });
       }
+      if (window.lucide) lucide.createIcons();
     })();
   </script>
   {% block extra_js %}{% endblock %}
