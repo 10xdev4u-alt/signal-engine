@@ -108,6 +108,12 @@
           window.location.href = "/search";
         }
       });
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 880) {
+          sidebarOpen = false;
+          closeMenu();
+        }
+      });
       if (window.lucide) lucide.createIcons();
     })();
   </script>
