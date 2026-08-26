@@ -10,26 +10,28 @@
 </div>
 {% if clusters %}
 <div class="card">
-  <table>
-    <thead>
-      <tr><th>Cluster</th><th class="num">Mentions</th><th class="num">Desperation</th><th>Seen</th></tr>
-    </thead>
-    <tbody>
-      {% for c in clusters %}
-      <tr>
-        <td><a href="/pains/{{ c.id }}">{{ c.label }}</a></td>
-        <td class="num">{{ c.mention_count }}</td>
-        <td class="num score">{{ "%.1f" | format(c.desperation_score) }}</td>
-        <td class="num muted">{{ c.first_seen or "?" }} → {{ c.last_seen or "?" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Cluster</th><th class="num">Mentions</th><th class="num">Desperation</th><th>Seen</th></tr>
+      </thead>
+      <tbody>
+        {% for c in clusters %}
+        <tr>
+          <td><a href="/pains/{{ c.id }}">{{ c.label }}</a></td>
+          <td class="num">{{ c.mention_count }}</td>
+          <td class="num score">{{ "%.1f" | format(c.desperation_score) }}</td>
+          <td class="num muted">{{ c.first_seen or "?" }} → {{ c.last_seen or "?" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% else %}
 <div class="card empty">
-  <h3 style="margin: 0 0 var(--space-2);">Nothing collected yet</h3>
-  <p style="margin: 0;">Run <code>./run.sh fetch</code> then <code>./run.sh analyze</code> to cluster pain points.</p>
+  <h3>Nothing collected yet</h3>
+  <p>Run <code>./run.sh fetch</code> then <code>./run.sh analyze</code> to cluster pain points.</p>
 </div>
 {% endif %}
 {% endblock %}

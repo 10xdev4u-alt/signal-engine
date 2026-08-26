@@ -15,8 +15,9 @@
   </script>
 </head>
 <body>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
   <div class="shell">
-    <aside class="shell-sidebar" aria-label="Primary">
+    <aside class="shell-sidebar" id="sidebar" aria-label="Primary">
       <a class="brand" href="/digest">
         <span class="brand-mark">SE</span>
         <span>
@@ -33,9 +34,9 @@
         <a class="nav-link" href="/search" {% if request.url.path.startswith('/search') %}aria-current="page"{% endif %}>Search</a>
         <a class="nav-link" href="/status" {% if request.url.path == '/status' %}aria-current="page"{% endif %}>Status</a>
       </nav>
-      <div style="margin-top:auto; display:flex; flex-direction:column; gap:.5rem;">
+      <div style="margin-top:auto; display:flex; flex-direction:column; gap:var(--sp-2);">
         <a class="nav-link" href="https://github.com/10xdev4u-alt/signal-engine" rel="noreferrer" target="_blank">
-          <span style="font-size:.85rem">↗</span> Source
+          <span>↗</span> Source
         </a>
         <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
           <span id="theme-icon">☾</span>
@@ -44,6 +45,7 @@
     </aside>
     <div class="shell-main">
       <header class="topbar">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar" type="button">☰</button>
         <nav class="crumbs" aria-label="Breadcrumb">
           {% block crumbs %}
             <a href="/digest">signal-engine</a>
@@ -80,6 +82,19 @@
           e.preventDefault();
           window.location.href = "/search";
         }
+      });
+      var toggle = document.getElementById("menu-toggle");
+      var sidebar = document.getElementById("sidebar");
+      var overlay = document.getElementById("sidebar-overlay");
+      function openMenu() { sidebar.classList.add("open"); overlay.classList.add("open"); if (toggle) toggle.setAttribute("aria-expanded", "true"); }
+      function closeMenu() { sidebar.classList.remove("open"); overlay.classList.remove("open"); if (toggle) toggle.setAttribute("aria-expanded", "false"); }
+      if (toggle) toggle.addEventListener("click", function () {
+        sidebar.classList.contains("open") ? closeMenu() : openMenu();
+      });
+      if (overlay) overlay.addEventListener("click", closeMenu);
+      // Close menu if viewport expands past the mobile breakpoint
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 880) closeMenu();
       });
     })();
   </script>
