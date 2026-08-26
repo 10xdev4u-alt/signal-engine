@@ -71,10 +71,13 @@ class httpClientTransport(httpx.BaseTransport):
         parsed = urllib.parse.urlparse(url)
         context = ssl.create_default_context()
         if parsed.scheme == "https":
-            klass = http.client.HTTPSConnection
+            conn = http.client.HTTPSConnection(
+                parsed.hostname, port=parsed.port, timeout=self.timeout, context=context,
+            )
         else:
-            klass = http.client.HTTPConnection
-        conn = klass(parsed.hostname, port=parsed.port, timeout=self.timeout, context=context)
+            conn = http.client.HTTPConnection(
+                parsed.hostname, port=parsed.port, timeout=self.timeout,
+            )
         path = parsed.path + (("?" + parsed.query) if parsed.query else "")
         headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
         try:
