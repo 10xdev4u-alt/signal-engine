@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Signal Engine{% endblock %}</title>
   <link rel="stylesheet" href="/static/app.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23ff6b1a'/%3E%3Cpath d='M6 16l3-8 3 6 3-4 3 6' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%238B5CF6'/%3E%3Cpath d='M6 16l3-8 3 6 3-4 3 6' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <meta name="color-scheme" content="dark light">
   <script>
     (function () {
@@ -15,6 +15,7 @@
   </script>
 </head>
 <body>
+  <div class="cursor-spotlight" id="cursor-spotlight"></div>
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
   <div class="shell">
     <aside class="shell-sidebar" id="sidebar" aria-label="Primary">
@@ -45,16 +46,21 @@
     </aside>
     <div class="shell-main">
       <header class="topbar">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar" type="button">☰</button>
-        <nav class="crumbs" aria-label="Breadcrumb">
-          {% block crumbs %}
-            <a href="/digest">signal-engine</a>
-          {% endblock %}
-        </nav>
-        <a class="search-pill" href="/search">
-          <span>Search collected data…</span>
-          <kbd>Ctrl K</kbd>
-        </a>
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar" type="button">☰</button>
+          <nav class="crumbs" aria-label="Breadcrumb">
+            {% block crumbs %}
+              <a href="/digest">signal-engine</a>
+            {% endblock %}
+          </nav>
+        </div>
+        <div style="display:flex; align-items:center; gap:var(--sp-3);">
+          <a class="search-pill" href="/search">
+            <span>Search collected data…</span>
+            <kbd>Ctrl K</kbd>
+          </a>
+          <a class="upgrade-pill" href="#">★ Upgrade</a>
+        </div>
       </header>
       <main class="content">
         {% block content %}{% endblock %}
@@ -92,10 +98,16 @@
         sidebar.classList.contains("open") ? closeMenu() : openMenu();
       });
       if (overlay) overlay.addEventListener("click", closeMenu);
-      // Close menu if viewport expands past the mobile breakpoint
       window.addEventListener("resize", function () {
         if (window.innerWidth > 880) closeMenu();
       });
+      var spotlight = document.getElementById("cursor-spotlight");
+      if (spotlight) {
+        document.addEventListener("mousemove", function (e) {
+          spotlight.style.left = e.clientX + "px";
+          spotlight.style.top = e.clientY + "px";
+        });
+      }
     })();
   </script>
   {% block extra_js %}{% endblock %}

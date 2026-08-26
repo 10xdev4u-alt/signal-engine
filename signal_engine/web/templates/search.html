@@ -10,49 +10,51 @@
 </div>
 <div class="card">
   <form method="get" action="/search" style="display:flex; gap:.5rem; flex-wrap:wrap; margin: 0;">
-    <input type="text" name="q" value="{{ q }}" placeholder='e.g. chargebacks or "dispute template"' style="flex:1; min-width:14rem; padding:.5rem .7rem; background: var(--bg-3); border:1px solid var(--line); border-radius:6px; color:var(--fg-1);">
-    <input type="text" name="sub" value="{{ sub }}" placeholder="subreddit" style="width:9rem; padding:.5rem .7rem; background: var(--bg-3); border:1px solid var(--line); border-radius:6px; color:var(--fg-1);">
-    <select name="type" style="padding:.5rem .7rem; background: var(--bg-3); border:1px solid var(--line); border-radius:6px; color:var(--fg-1);">
+    <input type="text" name="q" value="{{ q }}" placeholder='e.g. chargebacks or "dispute template"' style="flex:1; min-width:14rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="text" name="sub" value="{{ sub }}" placeholder="subreddit" style="width:9rem; padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <select name="type" style="padding:.5rem .7rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
       <option value="">all</option>
       <option value="post" {% if type == 'post' %}selected{% endif %}>posts</option>
       <option value="comment" {% if type == 'comment' %}selected{% endif %}>comments</option>
     </select>
-    <input type="date" name="from" value="{{ from }}" style="padding:.5rem; background: var(--bg-3); border:1px solid var(--line); border-radius:6px; color:var(--fg-1);">
-    <input type="date" name="to" value="{{ to }}" style="padding:.5rem; background: var(--bg-3); border:1px solid var(--line); border-radius:6px; color:var(--fg-1);">
+    <input type="date" name="from" value="{{ from }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
+    <input type="date" name="to" value="{{ to }}" style="padding:.5rem; background: var(--bg-elevated); border:1px solid var(--obsidian-border); border-radius:var(--radius-sm); color:var(--fg-1);">
     <button type="submit" style="padding:.5rem 1.2rem;">Search</button>
   </form>
 </div>
 <p class="muted">{{ indexed }} items indexed</p>
 {% if results %}
 <div class="card">
-  <table>
-    <thead>
-      <tr><th>Type</th><th>Sub</th><th>Title</th><th>Match</th><th>Date</th><th>Link</th></tr>
-    </thead>
-    <tbody>
-      {% for r in results %}
-      <tr>
-        <td>{{ r.ref_type }}</td>
-        <td>r/{{ r.subreddit }}</td>
-        <td>{{ r.title }}</td>
-        <td>{{ r.snip | safe }}</td>
-        <td class="muted">{{ r.created_utc[:10] }}</td>
-        <td><a href="{{ r.permalink }}" rel="noreferrer" target="_blank">↗</a></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Type</th><th>Sub</th><th>Title</th><th>Match</th><th>Date</th><th>Link</th></tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>{{ r.ref_type }}</td>
+          <td>r/{{ r.subreddit }}</td>
+          <td>{{ r.title }}</td>
+          <td>{{ r.snip | safe }}</td>
+          <td class="muted">{{ r.created_utc[:10] }}</td>
+          <td><a href="{{ r.permalink }}" rel="noreferrer" target="_blank">↗</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <p class="muted">showing {{ results | length }} result(s), capped at 200</p>
 </div>
 {% elif q %}
 <div class="card empty">
-  <h3 style="margin: 0 0 var(--space-2);">No matches</h3>
-  <p style="margin: 0;">Try fewer terms or drop the filters.</p>
+  <h3>No matches</h3>
+  <p>Try fewer terms or drop the filters.</p>
 </div>
 {% else %}
 <div class="card empty">
-  <h3 style="margin: 0 0 var(--space-2);">Type a query above</h3>
-  <p style="margin: 0;">Supports "exact phrases" and multiple terms (AND).</p>
+  <h3>Type a query above</h3>
+  <p>Supports "exact phrases" and multiple terms (AND).</p>
 </div>
 {% endif %}
 {% endblock %}
