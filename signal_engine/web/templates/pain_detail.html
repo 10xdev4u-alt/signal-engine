@@ -10,19 +10,19 @@
       desperation {{ "%.1f" | format(cluster.desperation_score) }}
     </p>
   </div>
-  <a class="nav-link" href="/pains" style="background: var(--bg-3); color: var(--fg-2);">← all pains</a>
+  <a class="btn" href="/pains">← all pains</a>
 </div>
 <div class="card">
   <div class="card-head">
-    <h2 class="card-title">Evidence</h2>
+    <h3 class="card-title">Evidence</h3>
     <p class="card-sub">Each quote is a real post or comment that landed in this cluster.</p>
   </div>
   {% if members %}
-  <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+  <div style="display: flex; flex-direction: column; gap: var(--sp-3);">
     {% for m in members %}
     <blockquote class="quote">
       {{ m.quote }}
-      {% if m.permalink %}<div class="muted" style="margin-top: var(--space-2);"><a href="{{ m.permalink }}" rel="noreferrer" target="_blank">{{ m.ref_type }} ↗</a></div>{% endif %}
+      {% if m.permalink %}<div class="muted" style="margin-top: var(--sp-2);"><a href="{{ m.permalink }}" rel="noreferrer" target="_blank">{{ m.ref_type }} ↗</a></div>{% endif %}
     </blockquote>
     {% endfor %}
   </div>

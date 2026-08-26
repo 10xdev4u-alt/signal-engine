@@ -9,7 +9,7 @@
     <h1 class="page-title">Eval queue</h1>
     <p class="page-subtitle">Mark each flagged item as <em>real problem</em> or <em>noise</em>. The precision@10 figure below is the share of marked items that were real problems. Target: 0.70 or higher.</p>
   </div>
-  <a class="nav-link" href="/eval/marks.json" style="background: var(--bg-3); color: var(--fg-2);">Export marks JSON ↗</a>
+  <a class="btn" href="/eval/marks.json">Export marks JSON ↗</a>
 </div>
 
 <div class="kpi-row">
@@ -25,7 +25,7 @@
   </div>
   <div class="kpi">
     <span class="kpi-label">Precision@10</span>
-    <span class="kpi-value" style="color: {% if pct >= 70 %}var(--good){% elif pct < 50 %}var(--bad){% else %}var(--warn){% endif %};">{{ "%.2f" | format(p10 or 0) }}</span>
+    <span class="kpi-value" style="color: {% if pct >= 70 %}var(--good){% elif pct < 50 %}var(--danger){% else %}var(--warn){% endif %};">{{ "%.2f" | format(p10 or 0) }}</span>
     <span class="kpi-trend {% if pct >= 70 %}up{% elif pct < 50 %}down{% endif %}">
       target: 0.70 · {{ recommendation }}
     </span>
@@ -33,10 +33,10 @@
 </div>
 
 <div class="card">
-  <div style="margin-bottom: var(--space-4);">
-    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-2);">
-      <span class="section-title" style="margin: 0;">Coverage of last 7 days</span>
-      <span class="muted" style="font-size: 0.85rem;">{{ evaluated }} / {{ sample_size }} reviewed</span>
+  <div style="margin-bottom: var(--sp-5);">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--sp-2);">
+      <span class="section-title">Coverage of last 7 days</span>
+      <span class="muted">{{ evaluated }} / {{ sample_size }} reviewed</span>
     </div>
     <div class="progress {{ progress_class }}">
       <span style="width: {{ ((evaluated / sample_size * 100) if sample_size else 0) | int }}%"></span>
@@ -44,17 +44,17 @@
   </div>
 
   {% if flagged %}
-  <div class="card-head" style="margin-top: var(--space-4);">
-    <h2 class="card-title">High-intent items</h2>
+  <div class="card-head" style="margin-top: var(--sp-5);">
+    <h3 class="card-title">High-intent items</h3>
     <p class="card-sub">Sorted newest first; one row per scored thread.</p>
   </div>
-  <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+  <div style="display: flex; flex-direction: column; gap: var(--sp-3);">
     {% for f in flagged %}
     <div class="intent-card">
       <div class="intent-score" data-score="{{ f.score }}">{{ f.score }}</div>
-      <div>
+      <div style="min-width: 0; flex: 1;">
         <div class="intent-text">{{ f.snippet or f.ref_id }} <span class="muted">· {{ f.scored_at[:10] }}</span></div>
-        <div class="muted" style="font-size: 0.8rem;">
+        <div class="muted" style="font-size: var(--text-sm); margin-top: var(--sp-1);">
           {% if f.verdict == "real_problem" %}<span class="tag good">real</span>
           {% elif f.verdict == "noise" %}<span class="tag bad">noise</span>
           {% else %}<span class="tag">unmarked</span>{% endif %}
@@ -69,14 +69,14 @@
           <input type="hidden" name="verdict" value="noise">
           <button class="danger" type="submit">Noise</button>
         </form>
-        {% if f.permalink %}<a class="nav-link" href="{{ f.permalink }}" rel="noreferrer" target="_blank" style="background: var(--bg-3); color: var(--fg-2); padding: 0.45rem 0.7rem;">↗</a>{% endif %}
+        {% if f.permalink %}<a class="btn" href="{{ f.permalink }}" rel="noreferrer" target="_blank">↗</a>{% endif %}
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
   <div class="empty">
-    <h3 style="margin: 0 0 var(--space-2); color: var(--fg-2);">No high-intent items yet</h3>
+    <h3>No high-intent items yet</h3>
     <p>Run the digest a few times. Items with intent score 4 or 5 from the trailing 7 days will appear here.</p>
   </div>
   {% endif %}
@@ -85,17 +85,15 @@
 {% if week_digests %}
 <div class="card">
   <div class="card-head">
-    <h2 class="card-title">Recent digests (last 7 days)</h2>
+    <h3 class="card-title">Recent digests (last 7 days)</h3>
     <p class="card-sub">One line per generated morning brief.</p>
   </div>
   <div class="timeline">
     {% for d in week_digests %}
-    <div class="timeline-item ok">
+    <div class="timeline-item">
       <div class="timeline-when">{{ d.date }}</div>
       <div class="timeline-what">
         {% set lines = d.md.splitlines() if d.md else [] %}
-        {% set snippet = "" %}
-        {% for line in lines[1:5] %}{% if line.strip() and not line.strip().startswith('## ') %}{% set _ = snippet %}{% endif %}{% endfor %}
         {% if lines and lines[1] and not lines[1].startswith('## ') %}{{ lines[1][:120] }}{% else %}_digest generated_{% endif %}
       </div>
     </div>
