@@ -45,7 +45,7 @@
     </aside>
     <div class="shell-main">
       <header class="topbar">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" type="button">☰</button>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="sidebar" type="button">☰</button>
         <nav class="crumbs" aria-label="Breadcrumb">
           {% block crumbs %}
             <a href="/digest">signal-engine</a>
@@ -86,12 +86,16 @@
       var toggle = document.getElementById("menu-toggle");
       var sidebar = document.getElementById("sidebar");
       var overlay = document.getElementById("sidebar-overlay");
-      function openMenu() { sidebar.classList.add("open"); overlay.classList.add("open"); }
-      function closeMenu() { sidebar.classList.remove("open"); overlay.classList.remove("open"); }
+      function openMenu() { sidebar.classList.add("open"); overlay.classList.add("open"); if (toggle) toggle.setAttribute("aria-expanded", "true"); }
+      function closeMenu() { sidebar.classList.remove("open"); overlay.classList.remove("open"); if (toggle) toggle.setAttribute("aria-expanded", "false"); }
       if (toggle) toggle.addEventListener("click", function () {
         sidebar.classList.contains("open") ? closeMenu() : openMenu();
       });
       if (overlay) overlay.addEventListener("click", closeMenu);
+      // Close menu if viewport expands past the mobile breakpoint
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 880) closeMenu();
+      });
     })();
   </script>
   {% block extra_js %}{% endblock %}
