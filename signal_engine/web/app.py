@@ -7,9 +7,11 @@ from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+STATIC_DIR = Path(__file__).parent / "static"
 
 
 def sanitize_fts_query(raw: str) -> str:
@@ -290,6 +292,8 @@ def create_app() -> FastAPI:
         )
 
     app.include_router(router)
+    if STATIC_DIR.is_dir():
+        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     return app
 
 
