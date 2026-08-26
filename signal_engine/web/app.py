@@ -100,8 +100,18 @@ def create_app() -> FastAPI:
         )
 
     @router.get("/profile/{subreddit}", response_class=HTMLResponse)
-    def profile(subreddit: str, request: Request):
+    def profile(subreddit: str, request: Request, build: bool = False):
         conn = _db()
+        if build:
+            from signal_engine.analyze.profile import build_profile
+            from signal_engine.config import load_settings
+            from signal_engine.llm.base import make_provider
+
+            provider = make_provider(load_settings())
+            build_profile(
+                conn, subreddit, provider=provider,
+                monthly_cap=load_settings().monthly_llm_budget,
+            )
         snapshots = conn.execute(
             "SELECT snapshot_md, generated_at FROM profiles "
             "WHERE subreddit = ? ORDER BY generated_at DESC LIMIT 1",
@@ -110,7 +120,7 @@ def create_app() -> FastAPI:
         return templates.TemplateResponse(
             request,
             "profile.html",
-            {"subreddit": subreddit, "snapshots": [dict(s) for s in snapshots]},
+            {"subreddit": subreddit, "snapshots": [dict(s) for s in snapshots], "built": build},
         )
 
     @router.post("/eval/{ref_type}/{ref_id}", response_class=RedirectResponse)
