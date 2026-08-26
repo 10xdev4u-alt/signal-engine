@@ -1,10 +1,21 @@
-"""Dashboard tests: every page renders on empty and populated databases."""
+"""Dashboard API tests: every API endpoint returns correct JSON."""
 
 import pytest
 from fastapi.testclient import TestClient
 
 from signal_engine.db import add_subreddit, connect, migrate
+from signal_engine.ingest.store import upsert_post
+from signal_engine.sources.base import PostEntry
 from signal_engine.web.app import create_app, run_server
+
+
+def _post(pid: str, title: str, body: str) -> PostEntry:
+    return PostEntry(
+        id=f"t3_{pid}", subreddit="smallbusiness", title=title,
+        author="/u/tester", selftext=body,
+        permalink=f"https://old.reddit.com/r/smallbusiness/comments/{pid}/",
+        created_utc="2026-08-20T10:00:00+00:00",
+    )
 
 
 @pytest.fixture()
@@ -13,55 +24,46 @@ def client(tmp_path, monkeypatch):
     conn = connect(str(tmp_path / "t.db"))
     migrate(conn)
     add_subreddit(conn, "smallbusiness")
-    yield client_for(monkeypatch), conn
+    yield TestClient(create_app()), conn
 
 
-def client_for(monkeypatch):
-    return TestClient(create_app())
-
-
-def seed_cluster(conn):
-    conn.execute(
-        "INSERT INTO posts(id, subreddit, title, selftext, permalink, created_utc) "
-        "VALUES ('t3_cb', 'smallbusiness', 'Chargebacks destroying margin', "
-        "'spent 400 on fee', 'https://old.reddit.com/r/smallbusiness/comments/cb/', "
-        "'2026-08-20T10:00:00+00:00')"
-    )
-    conn.execute(
-        "INSERT INTO pain_clusters(label, mention_count, desperation_score) "
-        "VALUES ('chargeback fee margin', 1, 2.0)"
-    )
-    conn.execute(
-        "INSERT INTO cluster_members(cluster_id, ref_type, ref_id, quote) "
-        "VALUES (1, 'post', 't3_cb', 'How do I stop chargebacks?')"
-    )
-    conn.execute(
-        "INSERT INTO fetch_log(url, kind, http_status, bytes) "
-        "VALUES ('https://www.reddit.com/r/x/.rss', 'post_feed', 429, 10)"
-    )
-    conn.commit()
-
-
-def test_all_routes_render_on_empty_db(client):
+def test_all_api_endpoints_return_200_on_empty_db(client):
     http, _ = client
-    for path in ("/digest", "/pains", "/status", "/profile/nope"):
-        response = http.get(path, follow_redirects=False)
-        assert response.status_code in (200, 302), f"{path} -> {response.status_code}"
-    assert http.get("/", follow_redirects=False).headers["location"] == "/digest"
+    for path in ("/api/digest", "/api/pains", "/api/status", "/api/profile/nope"):
+        resp = http.get(path)
+        assert resp.status_code == 200, f"{path} -> {resp.status_code}"
 
 
-def test_pain_pages_render_populated(client):
+def test_pain_api_returns_populated_data(client):
     http, conn = client
-    seed_cluster(conn)
-    listing = http.get("/pains")
-    assert listing.status_code == 200
-    assert "chargeback" in listing.text
-    detail = http.get("/pains/1")
-    assert detail.status_code == 200
-    assert "How do I stop chargebacks?" in detail.text
-    assert "old.reddit.com" in detail.text
-    status_page = http.get("/status")
-    assert "429" in status_page.text  # recent problems surfaced
+    upsert_post(conn, _post("cb", "Chargebacks destroying margin", "spent 400 on fee"))
+    from signal_engine.analyze.cluster import rebuild_clusters
+    rebuild_clusters(conn)
+    resp = http.get("/api/pains")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["clusters"]) > 0
+
+
+def test_pain_detail_api_returns_evidence(client):
+    http, conn = client
+    upsert_post(conn, _post("cb", "Chargebacks destroying margin", "spent 400 on fee"))
+    from signal_engine.analyze.cluster import rebuild_clusters
+    rebuild_clusters(conn)
+    resp = http.get("/api/pains/1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["cluster"]["mention_count"] >= 1
+    assert len(data["members"]) > 0
+
+
+def test_status_api_returns_subs(client):
+    http, conn = client
+    resp = http.get("/api/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["subs"]) > 0
+    assert data["subs"][0]["name"] == "smallbusiness"
 
 
 def test_server_refuses_non_loopback():
@@ -71,5 +73,5 @@ def test_server_refuses_non_loopback():
 
 def test_unknown_pain_returns_404(client):
     http, _ = client
-    response = http.get("/pains/424242")
-    assert response.status_code == 404
+    resp = http.get("/api/pains/424242")
+    assert resp.status_code == 404

@@ -185,6 +185,20 @@ def cmd_serve(_args) -> int:
     return 0
 
 
+def cmd_api(_args) -> int:
+    """Run the pure JSON API server (no frontend)."""
+    import uvicorn
+
+    from signal_engine.api.routes import create_api_router
+    from fastapi import FastAPI
+
+    app = FastAPI(title="Signal Engine API", docs_url="/docs")
+    app.include_router(create_api_router())
+    settings, _ = _open_db()
+    uvicorn.run(app, host="127.0.0.1", port=settings.port, log_level="warning")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="signal-engine", description=__doc__)
     parser.add_argument("--version", action="version", version=__version__)
